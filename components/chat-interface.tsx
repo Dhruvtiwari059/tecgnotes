@@ -5,7 +5,7 @@ import { useLanguage } from '@/lib/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, User, Bot, ImagePlus, X, Loader2, KeyRound, Clock } from 'lucide-react';
+import { Send, User, Bot, ImagePlus, X, Loader as Loader2, KeyRound, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -235,7 +235,7 @@ export function ChatInterface({ fullPage = false }: { fullPage?: boolean }) {
         </div>
         <div className="flex-1 min-w-0">
           <h2 className="text-lg font-bold text-white">TechNotes AI</h2>
-          <p className="text-xs text-gray-400">{t('Powered by Gemini 1.5 Flash', 'Gemini 1.5 Flash द्वारा संचालित')}</p>
+          <p className="text-xs text-gray-400">{t('Powered by Gemini 2.5 Flash', 'Gemini 2.5 Flash द्वारा संचालित')}</p>
         </div>
         {/* Active key indicator */}
         <div className="flex items-center gap-1.5 flex-shrink-0">
