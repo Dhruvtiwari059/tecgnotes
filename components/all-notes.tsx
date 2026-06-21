@@ -5,7 +5,7 @@ import { useLanguage } from '@/lib/language';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, FileText, Download, Eye } from 'lucide-react';
+import { ArrowLeft, FileText, Download, Eye, Type } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
@@ -13,15 +13,49 @@ interface NoteItem {
   id: string;
   title: string;
   file_name: string;
-  pdf_url: string;
+  pdf_url: string | null;
   unit_number: number | null;
   subject_name: string | null;
+  content_type: string;
+  text_content: string | null;
+}
+
+function renderTextContent(text: string): React.ReactNode {
+  // Simple markdown-like rendering
+  const lines = text.split('\n');
+  return lines.map((line, i) => {
+    // Headers
+    if (line.startsWith('### ')) {
+      return <h4 key={i} className="text-md font-bold text-white mt-4 mb-2">{line.slice(4)}</h4>;
+    }
+    if (line.startsWith('## ')) {
+      return <h3 key={i} className="text-lg font-bold text-white mt-4 mb-2">{line.slice(3)}</h3>;
+    }
+    if (line.startsWith('# ')) {
+      return <h2 key={i} className="text-xl font-bold text-white mt-4 mb-2">{line.slice(2)}</h2>;
+    }
+    // Bold
+    let processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // Code
+    processedLine = processedLine.replace(/`(.*?)`/g, '<code class="bg-gray-700 px-1 rounded text-sm">$1</code>');
+    // List items
+    if (line.startsWith('- ')) {
+      return <li key={i} className="text-gray-300 ml-4" dangerouslySetInnerHTML={{ __html: processedLine.slice(2) }} />;
+    }
+    // Empty line
+    if (line.trim() === '') {
+      return <br key={i} />;
+    }
+    // Regular text
+    return <p key={i} className="text-gray-300 mb-1" dangerouslySetInnerHTML={{ __html: processedLine }} />;
+  });
 }
 
 export function AllNotes() {
   const { t } = useLanguage();
   const [notes, setNotes] = useState<NoteItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedText, setExpandedText] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     async function fetchNotes() {
@@ -40,6 +74,8 @@ export function AllNotes() {
           pdf_url: n.file_url,
           unit_number: n.unit_number,
           subject_name: n.subject_name,
+          content_type: n.content_type || 'file',
+          text_content: n.text_content,
         }));
         setNotes(mapped);
         setLoading(false);
@@ -64,6 +100,8 @@ export function AllNotes() {
           pdf_url: n.pdf_url,
           unit_number: n.unit_number,
           subject_name: sub?.name || null,
+          content_type: 'file',
+          text_content: null,
         };
       });
       setNotes(mapped);
@@ -71,6 +109,16 @@ export function AllNotes() {
     }
     fetchNotes();
   }, []);
+
+  const toggleText = (id: string) => {
+    const newExpanded = new Set(expandedText);
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id);
+    } else {
+      newExpanded.add(id);
+    }
+    setExpandedText(newExpanded);
+  };
 
   const cardColors = [
     'border-blue-500/30',
@@ -111,36 +159,70 @@ export function AllNotes() {
         ) : (
           <div className="space-y-4">
             {notes.map((note, i) => (
-              <Card key={note.id} className={`bg-gray-900 border ${cardColors[i % cardColors.length]} p-5 flex items-center justify-between gap-4 flex-wrap`}>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-5 h-5 text-[#F97316]" />
-                  </div>
-                  <div>
-                    <p className="text-white font-semibold">{note.title}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      {note.subject_name && (
-                        <span className="text-xs text-gray-400">{note.subject_name}</span>
-                      )}
-                      {note.unit_number && (
-                        <span className="px-1.5 py-0.5 rounded text-xs bg-white/5 text-gray-500">Unit {note.unit_number}</span>
+              <div key={note.id}>
+                <Card className={`bg-gray-900 border ${cardColors[i % cardColors.length]} p-5 ${note.content_type === 'text' && expandedText.has(note.id) ? '' : 'flex items-center justify-between gap-4 flex-wrap'}`}>
+                  <div className={`flex items-center gap-3 ${note.content_type === 'text' && expandedText.has(note.id) ? 'mb-4' : ''}`}>
+                    <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                      {note.content_type === 'text' ? (
+                        <Type className="w-5 h-5 text-green-400" />
+                      ) : (
+                        <FileText className="w-5 h-5 text-[#F97316]" />
                       )}
                     </div>
+                    <div>
+                      <p className="text-white font-semibold">{note.title}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        {note.content_type === 'text' && (
+                          <span className="px-2 py-0.5 rounded text-xs bg-green-500/10 text-green-400">{t('Text', 'टेक्स्ट')}</span>
+                        )}
+                        {note.subject_name && (
+                          <span className="text-xs text-gray-400">{note.subject_name}</span>
+                        )}
+                        {note.unit_number && (
+                          <span className="px-1.5 py-0.5 rounded text-xs bg-white/5 text-gray-500">Unit {note.unit_number}</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button size="sm" variant="ghost" className="text-gray-300 hover:text-white" onClick={() => window.open(note.pdf_url, '_blank')}>
-                    <Eye className="w-4 h-4 mr-1" />
-                    {t('View', 'देखें')}
-                  </Button>
-                  <Button size="sm" className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white" asChild>
-                    <a href={note.pdf_url} download>
-                      <Download className="w-4 h-4 mr-1" />
-                      {t('Download', 'डाउनलोड')}
-                    </a>
-                  </Button>
-                </div>
-              </Card>
+
+                  {note.content_type === 'file' && note.pdf_url && (
+                    <div className="flex items-center gap-2">
+                      <Button size="sm" variant="ghost" className="text-gray-300 hover:text-white" onClick={() => window.open(note.pdf_url!, '_blank')}>
+                        <Eye className="w-4 h-4 mr-1" />
+                        {t('View', 'देखें')}
+                      </Button>
+                      <Button size="sm" className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white" asChild>
+                        <a href={note.pdf_url!} download>
+                          <Download className="w-4 h-4 mr-1" />
+                          {t('Download', 'डाउनलोड')}
+                        </a>
+                      </Button>
+                    </div>
+                  )}
+
+                  {note.content_type === 'text' && (
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-gray-300 hover:text-white"
+                        onClick={() => toggleText(note.id)}
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        {expandedText.has(note.id) ? t('Hide', 'छुपाएं') : t('Read', 'पढ़ें')}
+                      </Button>
+                    </div>
+                  )}
+                </Card>
+
+                {note.content_type === 'text' && expandedText.has(note.id) && note.text_content && (
+                  <Card className="bg-gray-800 border-white/5 p-6 mt-2">
+                    <div className="prose prose-invert max-w-none">
+                      {renderTextContent(note.text_content)}
+                    </div>
+                  </Card>
+                )}
+              </div>
             ))}
           </div>
         )}

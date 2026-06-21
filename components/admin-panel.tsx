@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -17,7 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Shield, Lock, Users, BookOpen, FileText, KeyRound, Trash2, Plus, X, LogIn, Upload, FolderOpen, Loader as Loader2, Eye, File, Code as Code2, Briefcase } from 'lucide-react';
+import { Shield, Lock, Users, BookOpen, FileText, KeyRound, Trash2, Plus, X, LogIn, Upload, FolderOpen, Loader as Loader2, Eye, File, Code as Code2, Briefcase, Type } from 'lucide-react';
 
 interface FeedbackRow {
   id: string;
@@ -39,8 +40,10 @@ interface ContentFile {
   section: string;
   subject_name: string | null;
   file_name: string;
-  file_url: string;
-  file_type: string;
+  file_url: string | null;
+  file_type: string | null;
+  content_type: string;
+  text_content: string | null;
   uploaded_by: string | null;
   uploaded_at: string;
   unit_number: number | null;
@@ -84,6 +87,12 @@ export function AdminPanel() {
   const answerFileRef = useRef<HTMLInputElement>(null);
   const [answerPdfUrl, setAnswerPdfUrl] = useState<string | null>(null);
   const [uploadingAnswer, setUploadingAnswer] = useState(false);
+
+  // Text content state
+  const [contentType, setContentType] = useState<string>('file');
+  const [textContent, setTextContent] = useState('');
+  const [textTitle, setTextTitle] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     async function checkAdmin() {
@@ -203,6 +212,7 @@ export function AdminPanel() {
     // Build insert data based on section
     const insertData: any = {
       section: contentSection,
+      content_type: 'file',
       file_name: file.name,
       file_url: fileUrl,
       file_type: fileType,
@@ -248,6 +258,56 @@ export function AdminPanel() {
     setUploading(false);
   };
 
+  const handleTextSave = async () => {
+    if (!textContent.trim()) {
+      toast.error(t('Content cannot be empty', 'कंटेंट खाली नहीं हो सकता'));
+      return;
+    }
+
+    setSaving(true);
+
+    const insertData: any = {
+      section: contentSection,
+      content_type: 'text',
+      file_name: textTitle || subjectName || 'Text Content',
+      text_content: textContent,
+      uploaded_by: user.email,
+    };
+
+    if (contentSection === 'notes') {
+      insertData.subject_name = subjectName || null;
+      insertData.unit_number = unitNumber ? parseInt(unitNumber) : null;
+    } else if (contentSection === 'pyq') {
+      insertData.subject_name = subjectName || null;
+      insertData.pyq_year = pyqYear || null;
+    } else if (contentSection === 'dsa') {
+      insertData.subject_name = subjectName || null;
+    } else if (contentSection === 'placement') {
+      insertData.company = company || null;
+      insertData.category = category || null;
+      insertData.subject_name = subjectName || null;
+    }
+
+    const { error } = await supabase.from('content_files').insert(insertData);
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success(t('Content saved successfully', 'कंटेंट सफलतापूर्वक सेव किया गया'));
+      loadContentFiles(contentSection);
+      // Reset form
+      setTextContent('');
+      setTextTitle('');
+      setSubjectName('');
+      setUnitNumber('');
+      setPyqYear('');
+      setCompany('');
+      setCategory('');
+    }
+
+    setSaving(false);
+  };
+
   const handleAnswerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -262,10 +322,12 @@ export function AdminPanel() {
   };
 
   const handleDeleteFile = async (file: ContentFile) => {
-    // Delete from storage
-    const filePath = file.file_url.split('/notes-files/')[1];
-    if (filePath) {
-      await supabase.storage.from('notes-files').remove([filePath]);
+    // Delete from storage if it's a file
+    if (file.file_url) {
+      const filePath = file.file_url.split('/notes-files/')[1];
+      if (filePath) {
+        await supabase.storage.from('notes-files').remove([filePath]);
+      }
     }
 
     // Delete from database
@@ -273,7 +335,7 @@ export function AdminPanel() {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success(t('File deleted', 'फाइल हटा दी गई'));
+      toast.success(t('Content deleted', 'कंटेंट हटा दिया गया'));
       setContentFiles(contentFiles.filter(f => f.id !== file.id));
     }
   };
@@ -358,8 +420,8 @@ export function AdminPanel() {
               {/* Upload Form */}
               <Card className="bg-gray-900 border-white/10 p-6">
                 <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                  <Upload className="w-5 h-5 text-[#F97316]" />
-                  {t('Upload File', 'फाइल अपलोड करें')}
+                  {contentType === 'file' ? <Upload className="w-5 h-5 text-[#F97316]" /> : <Type className="w-5 h-5 text-[#F97316]" />}
+                  {contentType === 'file' ? t('Upload File', 'फाइल अपलोड करें') : t('Add Text Content', 'टेक्स्ट कंटेंट जोड़ें')}
                 </h3>
 
                 <div className="space-y-4">
@@ -380,6 +442,30 @@ export function AdminPanel() {
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-gray-300 text-sm">{t('Content Type', 'कंटेंट प्रकार')}</Label>
+                    <div className="flex gap-2 mt-2">
+                      <Button
+                        variant={contentType === 'file' ? 'default' : 'outline'}
+                        size="sm"
+                        className={contentType === 'file' ? 'bg-[#F97316] text-white' : 'border-white/10 text-gray-300'}
+                        onClick={() => setContentType('file')}
+                      >
+                        <Upload className="w-4 h-4 mr-1" />
+                        {t('File', 'फाइल')}
+                      </Button>
+                      <Button
+                        variant={contentType === 'text' ? 'default' : 'outline'}
+                        size="sm"
+                        className={contentType === 'text' ? 'bg-[#F97316] text-white' : 'border-white/10 text-gray-300'}
+                        onClick={() => setContentType('text')}
+                      >
+                        <Type className="w-4 h-4 mr-1" />
+                        {t('Text', 'टेक्स्ट')}
+                      </Button>
+                    </div>
                   </div>
 
                   {contentSection === 'notes' && (
@@ -426,35 +512,37 @@ export function AdminPanel() {
                           className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
                         />
                       </div>
-                      <div>
-                        <Label className="text-gray-300 text-sm">{t('Answer PDF (Optional)', 'उत्तर PDF (वैकल्पिक)')}</Label>
-                        {answerPdfUrl ? (
-                          <div className="flex items-center gap-2 mt-1 bg-green-500/10 border border-green-500/30 rounded px-3 py-2">
-                            <File className="w-4 h-4 text-green-400" />
-                            <span className="text-green-400 text-sm flex-1 truncate">{t('Answer uploaded', 'उत्तर अपलोड किया')}</span>
-                            <Button size="sm" variant="ghost" className="text-red-400 hover:text-red-300 h-6 w-6 p-0" onClick={() => setAnswerPdfUrl(null)}>
-                              <X className="w-4 h-4" />
+                      {contentType === 'file' && (
+                        <div>
+                          <Label className="text-gray-300 text-sm">{t('Answer PDF (Optional)', 'उत्तर PDF (वैकल्पिक)')}</Label>
+                          {answerPdfUrl ? (
+                            <div className="flex items-center gap-2 mt-1 bg-green-500/10 border border-green-500/30 rounded px-3 py-2">
+                              <File className="w-4 h-4 text-green-400" />
+                              <span className="text-green-400 text-sm flex-1 truncate">{t('Answer uploaded', 'उत्तर अपलोड किया')}</span>
+                              <Button size="sm" variant="ghost" className="text-red-400 hover:text-red-300 h-6 w-6 p-0" onClick={() => setAnswerPdfUrl(null)}>
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              className="w-full border-white/10 text-gray-300 hover:bg-white/5 mt-1"
+                              onClick={() => answerFileRef.current?.click()}
+                              disabled={uploadingAnswer}
+                            >
+                              {uploadingAnswer ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                              {t('Upload Answer PDF', 'उत्तर PDF अपलोड करें')}
                             </Button>
-                          </div>
-                        ) : (
-                          <Button
-                            variant="outline"
-                            className="w-full border-white/10 text-gray-300 hover:bg-white/5 mt-1"
-                            onClick={() => answerFileRef.current?.click()}
-                            disabled={uploadingAnswer}
-                          >
-                            {uploadingAnswer ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
-                            {t('Upload Answer PDF', 'उत्तर PDF अपलोड करें')}
-                          </Button>
-                        )}
-                        <input
-                          ref={answerFileRef}
-                          type="file"
-                          accept=".pdf"
-                          className="hidden"
-                          onChange={handleAnswerUpload}
-                        />
-                      </div>
+                          )}
+                          <input
+                            ref={answerFileRef}
+                            type="file"
+                            accept=".pdf"
+                            className="hidden"
+                            onChange={handleAnswerUpload}
+                          />
+                        </div>
+                      )}
                     </>
                   )}
 
@@ -469,27 +557,29 @@ export function AdminPanel() {
                           className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
                         />
                       </div>
-                      <div>
-                        <Label className="text-gray-300 text-sm">{t('File Type', 'फाइल प्रकार')}</Label>
-                        <div className="flex gap-2 mt-2">
-                          <Button
-                            variant={isNotesPdf ? 'default' : 'outline'}
-                            size="sm"
-                            className={isNotesPdf ? 'bg-[#F97316] text-white' : 'border-white/10 text-gray-300'}
-                            onClick={() => { setIsNotesPdf(true); setIsQuestionsPdf(false); }}
-                          >
-                            {t('Notes', 'नोट्स')}
-                          </Button>
-                          <Button
-                            variant={isQuestionsPdf ? 'default' : 'outline'}
-                            size="sm"
-                            className={isQuestionsPdf ? 'bg-[#F97316] text-white' : 'border-white/10 text-gray-300'}
-                            onClick={() => { setIsNotesPdf(false); setIsQuestionsPdf(true); }}
-                          >
-                            {t('Questions', 'प्रश्न')}
-                          </Button>
+                      {contentType === 'file' && (
+                        <div>
+                          <Label className="text-gray-300 text-sm">{t('File Type', 'फाइल प्रकार')}</Label>
+                          <div className="flex gap-2 mt-2">
+                            <Button
+                              variant={isNotesPdf ? 'default' : 'outline'}
+                              size="sm"
+                              className={isNotesPdf ? 'bg-[#F97316] text-white' : 'border-white/10 text-gray-300'}
+                              onClick={() => { setIsNotesPdf(true); setIsQuestionsPdf(false); }}
+                            >
+                              {t('Notes', 'नोट्स')}
+                            </Button>
+                            <Button
+                              variant={isQuestionsPdf ? 'default' : 'outline'}
+                              size="sm"
+                              className={isQuestionsPdf ? 'bg-[#F97316] text-white' : 'border-white/10 text-gray-300'}
+                              onClick={() => { setIsNotesPdf(false); setIsQuestionsPdf(true); }}
+                            >
+                              {t('Questions', 'प्रश्न')}
+                            </Button>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </>
                   )}
 
@@ -525,31 +615,65 @@ export function AdminPanel() {
                     </>
                   )}
 
-                  <div className="pt-4 border-t border-white/10">
-                    <Label className="text-gray-300 text-sm">{t('Select File', 'फाइल चुनें')}</Label>
-                    <Button
-                      variant="outline"
-                      className="w-full border-dashed border-white/20 text-gray-400 hover:text-white hover:border-white/40 mt-2 h-20"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploading}
-                    >
-                      {uploading ? (
-                        <Loader2 className="w-6 h-6 animate-spin" />
-                      ) : (
-                        <div className="text-center">
-                          <Upload className="w-6 h-6 mx-auto mb-1" />
-                          <span className="text-sm">{t('Click to upload PDF or Image', 'PDF या इमेज अपलोड करें')}</span>
-                        </div>
-                      )}
-                    </Button>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".pdf,image/*"
-                      className="hidden"
-                      onChange={handleFileUpload}
-                    />
-                  </div>
+                  {contentType === 'file' && (
+                    <div className="pt-4 border-t border-white/10">
+                      <Label className="text-gray-300 text-sm">{t('Select File', 'फाइल चुनें')}</Label>
+                      <Button
+                        variant="outline"
+                        className="w-full border-dashed border-white/20 text-gray-400 hover:text-white hover:border-white/40 mt-2 h-20"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploading}
+                      >
+                        {uploading ? (
+                          <Loader2 className="w-6 h-6 animate-spin" />
+                        ) : (
+                          <div className="text-center">
+                            <Upload className="w-6 h-6 mx-auto mb-1" />
+                            <span className="text-sm">{t('Click to upload PDF or Image', 'PDF या इमेज अपलोड करें')}</span>
+                          </div>
+                        )}
+                      </Button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".pdf,image/*"
+                        className="hidden"
+                        onChange={handleFileUpload}
+                      />
+                    </div>
+                  )}
+
+                  {contentType === 'text' && (
+                    <div className="pt-4 border-t border-white/10 space-y-4">
+                      <div>
+                        <Label className="text-gray-300 text-sm">{t('Title (Optional)', 'शीर्षक (वैकल्पिक)')}</Label>
+                        <Input
+                          value={textTitle}
+                          onChange={(e) => setTextTitle(e.target.value)}
+                          placeholder={t('e.g., Quick Notes, Summary', 'जैसे: क्विक नोट्स, सारांश')}
+                          className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-gray-300 text-sm">{t('Content', 'कंटेंट')}</Label>
+                        <Textarea
+                          value={textContent}
+                          onChange={(e) => setTextContent(e.target.value)}
+                          placeholder={t('Write your notes, explanations, or any text content here...', 'यहां अपने नोट्स, व्याख्या, या कोई भी टेक्स्ट कंटेंट लिखें...')}
+                          className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1 min-h-[200px] resize-y"
+                        />
+                        <p className="text-gray-500 text-xs mt-1">{t('Tip: You can use basic formatting like headings (#), bold (**text**), lists (- item), and code (`code`)', 'सुझाव: आप हेडिंग (#), बोल्ड (**टेक्स्ट**), सूचियां (- आइटम), और कोड (`कोड`) जैसे बेसिक फॉर्मेटिंग का उपयोग कर सकते हैं')}</p>
+                      </div>
+                      <Button
+                        className="w-full bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white"
+                        onClick={handleTextSave}
+                        disabled={saving || !textContent.trim()}
+                      >
+                        {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                        {t('Save Content', 'कंटेंट सेव करें')}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </Card>
 
@@ -558,69 +682,83 @@ export function AdminPanel() {
                 <Card className="bg-gray-900 border-white/10 p-6">
                   <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                     {SECTION_LABELS[contentSection]?.icon}
-                    {t('Uploaded Files', 'अपलोड की गई फाइलें')}
+                    {t('Uploaded Content', 'अपलोड किया गया कंटेंट')}
                   </h3>
 
                   {contentFiles.length === 0 ? (
                     <div className="text-center py-12">
                       <File className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                      <p className="text-gray-500">{t('No files uploaded yet.', 'अभी कोई फाइल नहीं अपलोड की गई।')}</p>
+                      <p className="text-gray-500">{t('No content uploaded yet.', 'अभी कोई कंटेंट नहीं अपलोड किया गया।')}</p>
                     </div>
                   ) : (
                     <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
                       {contentFiles.map((file) => (
-                        <Card key={file.id} className="bg-gray-800 border-white/5 p-4 flex items-center justify-between gap-4">
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
-                              <File className={`w-5 h-5 ${file.file_type === 'pdf' ? 'text-red-400' : 'text-blue-400'}`} />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-white font-medium truncate">{file.file_name}</p>
-                              <div className="flex flex-wrap gap-2 mt-1">
-                                {file.subject_name && (
-                                  <span className="px-2 py-0.5 rounded text-xs bg-blue-500/10 text-blue-400">{file.subject_name}</span>
+                        <Card key={file.id} className="bg-gray-800 border-white/5 p-4">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-start gap-3 min-w-0 flex-1">
+                              <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 mt-1">
+                                {file.content_type === 'text' ? (
+                                  <Type className="w-5 h-5 text-green-400" />
+                                ) : (
+                                  <File className={`w-5 h-5 ${file.file_type === 'pdf' ? 'text-red-400' : 'text-blue-400'}`} />
                                 )}
-                                {file.unit_number && (
-                                  <span className="px-2 py-0.5 rounded text-xs bg-white/5 text-gray-400">Unit {file.unit_number}</span>
-                                )}
-                                {file.pyq_year && (
-                                  <span className="px-2 py-0.5 rounded text-xs bg-[#F97316]/10 text-[#F97316]">{file.pyq_year}</span>
-                                )}
-                                {file.company && (
-                                  <span className="px-2 py-0.5 rounded text-xs bg-[#F97316]/10 text-[#F97316]">{file.company}</span>
-                                )}
-                                {file.category && (
-                                  <span className="px-2 py-0.5 rounded text-xs bg-blue-500/10 text-blue-400">{file.category}</span>
-                                )}
-                                {file.is_notes_pdf && (
-                                  <span className="px-2 py-0.5 rounded text-xs bg-green-500/10 text-green-400">{t('Notes', 'नोट्स')}</span>
-                                )}
-                                {file.is_questions_pdf && (
-                                  <span className="px-2 py-0.5 rounded text-xs bg-purple-500/10 text-purple-400">{t('Questions', 'प्रश्न')}</span>
-                                )}
-                                {file.answer_pdf_url && (
-                                  <span className="px-2 py-0.5 rounded text-xs bg-green-500/10 text-green-400">{t('Has Answer', 'उत्तर है')}</span>
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="text-white font-medium truncate">{file.file_name}</p>
+                                <div className="flex flex-wrap gap-2 mt-1">
+                                  {file.content_type === 'text' && (
+                                    <span className="px-2 py-0.5 rounded text-xs bg-green-500/10 text-green-400">{t('Text', 'टेक्स्ट')}</span>
+                                  )}
+                                  {file.subject_name && (
+                                    <span className="px-2 py-0.5 rounded text-xs bg-blue-500/10 text-blue-400">{file.subject_name}</span>
+                                  )}
+                                  {file.unit_number && (
+                                    <span className="px-2 py-0.5 rounded text-xs bg-white/5 text-gray-400">Unit {file.unit_number}</span>
+                                  )}
+                                  {file.pyq_year && (
+                                    <span className="px-2 py-0.5 rounded text-xs bg-[#F97316]/10 text-[#F97316]">{file.pyq_year}</span>
+                                  )}
+                                  {file.company && (
+                                    <span className="px-2 py-0.5 rounded text-xs bg-[#F97316]/10 text-[#F97316]">{file.company}</span>
+                                  )}
+                                  {file.category && (
+                                    <span className="px-2 py-0.5 rounded text-xs bg-blue-500/10 text-blue-400">{file.category}</span>
+                                  )}
+                                  {file.is_notes_pdf && (
+                                    <span className="px-2 py-0.5 rounded text-xs bg-green-500/10 text-green-400">{t('Notes', 'नोट्स')}</span>
+                                  )}
+                                  {file.is_questions_pdf && (
+                                    <span className="px-2 py-0.5 rounded text-xs bg-purple-500/10 text-purple-400">{t('Questions', 'प्रश्न')}</span>
+                                  )}
+                                  {file.answer_pdf_url && (
+                                    <span className="px-2 py-0.5 rounded text-xs bg-green-500/10 text-green-400">{t('Has Answer', 'उत्तर है')}</span>
+                                  )}
+                                </div>
+                                {file.content_type === 'text' && file.text_content && (
+                                  <p className="text-gray-400 text-sm mt-2 line-clamp-2">{file.text_content.substring(0, 150)}...</p>
                                 )}
                               </div>
                             </div>
-                          </div>
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="text-gray-400 hover:text-white"
-                              onClick={() => window.open(file.file_url, '_blank')}
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                              onClick={() => handleDeleteFile(file)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              {file.file_url && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="text-gray-400 hover:text-white"
+                                  onClick={() => window.open(file.file_url!, '_blank')}
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                              )}
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                onClick={() => handleDeleteFile(file)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
                         </Card>
                       ))}
