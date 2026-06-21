@@ -33,6 +33,27 @@ export function PlacementList() {
 
   useEffect(() => {
     async function fetchPlacement() {
+      // First try content_files table
+      const { data: contentData } = await supabase
+        .from('content_files')
+        .select('*')
+        .eq('section', 'placement')
+        .order('company', { ascending: true });
+
+      if (contentData && contentData.length > 0) {
+        const mapped = contentData.map((item: any) => ({
+          id: item.id,
+          company: item.company || 'General',
+          category: item.category || 'General',
+          title: item.subject_name || item.file_name,
+          pdf_url: item.file_url,
+        }));
+        setTopics(mapped);
+        setLoading(false);
+        return;
+      }
+
+      // Fallback to placement_topics table
       const { data } = await supabase.from('placement_topics').select('*').order('company', { ascending: true });
       setTopics(data || []);
       setLoading(false);

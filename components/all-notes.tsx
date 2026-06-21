@@ -5,17 +5,17 @@ import { useLanguage } from '@/lib/language';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, FileText, Download, Eye, BookOpen } from 'lucide-react';
+import { ArrowLeft, FileText, Download, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
 interface NoteItem {
   id: string;
   title: string;
+  file_name: string;
   pdf_url: string;
-  unit_number: number;
-  subject_name: string;
-  subject_slug: string;
+  unit_number: number | null;
+  subject_name: string | null;
 }
 
 export function AllNotes() {
@@ -25,6 +25,28 @@ export function AllNotes() {
 
   useEffect(() => {
     async function fetchNotes() {
+      // First try content_files table
+      const { data: contentData } = await supabase
+        .from('content_files')
+        .select('*')
+        .eq('section', 'notes')
+        .order('uploaded_at', { ascending: false });
+
+      if (contentData && contentData.length > 0) {
+        const mapped = contentData.map((n: any) => ({
+          id: n.id,
+          title: n.subject_name || n.file_name,
+          file_name: n.file_name,
+          pdf_url: n.file_url,
+          unit_number: n.unit_number,
+          subject_name: n.subject_name,
+        }));
+        setNotes(mapped);
+        setLoading(false);
+        return;
+      }
+
+      // Fallback to notes table
       const { data: notesData } = await supabase.from('notes').select('*').order('uploaded_at', { ascending: false }).limit(100);
       if (!notesData || notesData.length === 0) {
         setLoading(false);
@@ -38,10 +60,10 @@ export function AllNotes() {
         return {
           id: n.id,
           title: n.title,
+          file_name: n.title,
           pdf_url: n.pdf_url,
           unit_number: n.unit_number,
-          subject_name: sub?.name || 'Unknown',
-          subject_slug: sub?.slug || '',
+          subject_name: sub?.name || null,
         };
       });
       setNotes(mapped);
@@ -97,8 +119,12 @@ export function AllNotes() {
                   <div>
                     <p className="text-white font-semibold">{note.title}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-gray-400">{note.subject_name}</span>
-                      <span className="px-1.5 py-0.5 rounded text-xs bg-white/5 text-gray-500">Unit {note.unit_number}</span>
+                      {note.subject_name && (
+                        <span className="text-xs text-gray-400">{note.subject_name}</span>
+                      )}
+                      {note.unit_number && (
+                        <span className="px-1.5 py-0.5 rounded text-xs bg-white/5 text-gray-500">Unit {note.unit_number}</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -113,14 +139,6 @@ export function AllNotes() {
                       {t('Download', 'डाउनलोड')}
                     </a>
                   </Button>
-                  {note.subject_slug && (
-                    <Link href={`/subject/${note.subject_slug}`}>
-                      <Button size="sm" variant="outline" className="border-white/10 text-gray-300 hover:bg-white/5">
-                        <BookOpen className="w-4 h-4 mr-1" />
-                        {t('Subject', 'विषय')}
-                      </Button>
-                    </Link>
-                  )}
                 </div>
               </Card>
             ))}

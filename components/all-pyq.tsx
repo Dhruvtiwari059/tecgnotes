@@ -5,7 +5,7 @@ import { useLanguage } from '@/lib/language';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, HelpCircle, Download, Eye, BookOpen } from 'lucide-react';
+import { ArrowLeft, CircleHelp as HelpCircle, Download, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
@@ -14,8 +14,7 @@ interface PyqItem {
   year: string;
   pdf_url: string;
   answer_pdf_url: string | null;
-  subject_name: string;
-  subject_slug: string;
+  subject_name: string | null;
 }
 
 export function AllPYQ() {
@@ -25,6 +24,27 @@ export function AllPYQ() {
 
   useEffect(() => {
     async function fetchPYQ() {
+      // First try content_files table
+      const { data: contentData } = await supabase
+        .from('content_files')
+        .select('*')
+        .eq('section', 'pyq')
+        .order('uploaded_at', { ascending: false });
+
+      if (contentData && contentData.length > 0) {
+        const mapped = contentData.map((n: any) => ({
+          id: n.id,
+          year: n.pyq_year || 'Unknown',
+          pdf_url: n.file_url,
+          answer_pdf_url: n.answer_pdf_url,
+          subject_name: n.subject_name,
+        }));
+        setPyqs(mapped);
+        setLoading(false);
+        return;
+      }
+
+      // Fallback to pyq table
       const { data: pyqData } = await supabase.from('pyq').select('*').order('uploaded_at', { ascending: false }).limit(100);
       if (!pyqData || pyqData.length === 0) {
         setLoading(false);
@@ -40,8 +60,7 @@ export function AllPYQ() {
           year: n.year,
           pdf_url: n.pdf_url,
           answer_pdf_url: n.answer_pdf_url,
-          subject_name: sub?.name || 'Unknown',
-          subject_slug: sub?.slug || '',
+          subject_name: sub?.name || null,
         };
       });
       setPyqs(mapped);
@@ -89,7 +108,7 @@ export function AllPYQ() {
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="px-2 py-0.5 rounded text-xs font-bold bg-[#F97316]/10 text-[#F97316]">{pyq.year}</span>
-                      <span className="text-white font-semibold">{pyq.subject_name}</span>
+                      <span className="text-white font-semibold">{pyq.subject_name || 'Unknown'}</span>
                     </div>
                     <p className="text-gray-500 text-sm mt-1">{t('Previous Year Question Paper', 'पिछले साल का प्रश्न पत्र')}</p>
                   </div>
@@ -111,14 +130,6 @@ export function AllPYQ() {
                         {t('Answer', 'उत्तर')}
                       </a>
                     </Button>
-                  )}
-                  {pyq.subject_slug && (
-                    <Link href={`/subject/${pyq.subject_slug}`}>
-                      <Button size="sm" variant="outline" className="border-white/10 text-gray-300 hover:bg-white/5">
-                        <BookOpen className="w-4 h-4 mr-1" />
-                        {t('Subject', 'विषय')}
-                      </Button>
-                    </Link>
                   )}
                 </div>
               </Card>

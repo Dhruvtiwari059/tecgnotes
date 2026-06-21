@@ -5,7 +5,7 @@ import { useLanguage } from '@/lib/language';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Code2, FileText, Download, Eye, HelpCircle } from 'lucide-react';
+import { ArrowLeft, Code as Code2, FileText, Download, Eye, CircleHelp as HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
@@ -15,10 +15,6 @@ interface DsaTopic {
   notes_pdf_url: string | null;
   questions_pdf_url: string | null;
 }
-
-const topics = [
-  'Arrays', 'Linked List', 'Stack', 'Queue', 'Tree', 'Graph', 'Sorting', 'Searching', 'Dynamic Programming', 'Greedy', 'Recursion', 'Backtracking', 'Hashing', 'Heap', 'Trie'
-];
 
 const cardColors = [
   'border-blue-500/30 hover:border-blue-500/60',
@@ -35,6 +31,44 @@ export function DsaList() {
 
   useEffect(() => {
     async function fetchDsa() {
+      // First try content_files table
+      const { data: contentData } = await supabase
+        .from('content_files')
+        .select('*')
+        .eq('section', 'dsa')
+        .order('subject_name', { ascending: true });
+
+      if (contentData && contentData.length > 0) {
+        // Merge notes and questions for same topic
+        const topicMap = new Map<string, DsaTopic>();
+        contentData.forEach((item: any) => {
+          const name = item.subject_name || item.file_name;
+          if (!topicMap.has(name)) {
+            topicMap.set(name, {
+              id: item.id,
+              name,
+              notes_pdf_url: null,
+              questions_pdf_url: null,
+            });
+          }
+          const topic = topicMap.get(name)!;
+          if (item.is_notes_pdf) {
+            topic.notes_pdf_url = item.file_url;
+          }
+          if (item.is_questions_pdf) {
+            topic.questions_pdf_url = item.file_url;
+          }
+          // Use the file_url as notes if neither flag is set
+          if (!item.is_notes_pdf && !item.is_questions_pdf) {
+            topic.notes_pdf_url = item.file_url;
+          }
+        });
+        setDsaTopics(Array.from(topicMap.values()));
+        setLoading(false);
+        return;
+      }
+
+      // Fallback to dsa_topics table
       const { data } = await supabase.from('dsa_topics').select('*').order('name', { ascending: true });
       setDsaTopics(data || []);
       setLoading(false);
