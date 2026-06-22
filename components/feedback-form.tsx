@@ -6,11 +6,9 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { ArrowLeft, Mail, MessageSquare, Send, Loader2 } from 'lucide-react';
+import { ArrowLeft, MessageSquare, Send, Loader as Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
 
 export function FeedbackForm() {
   const { t } = useLanguage();
@@ -21,23 +19,38 @@ export function FeedbackForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim() || !message.trim()) {
-      toast.error(t('Please fill all fields', 'कृपया सभी फ़ील्ड भरें'));
+    if (!name.trim() || !message.trim()) {
+      toast.error(t('Please fill in name and message', 'कृपया नाम और संदेश भरें'));
       return;
     }
     setLoading(true);
-    const { error } = await supabase.from('feedback').insert({
-      name: name.trim(),
-      email: email.trim(),
-      message: message.trim(),
-    });
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success(t('Feedback sent successfully!', 'फीडबैक सफलतापूर्वक भेजा गया!'));
-      setName('');
-      setEmail('');
-      setMessage('');
+    try {
+      const response = await fetch('/api/submit-feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim() || undefined,
+          message: message.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          toast.error(t('Too many submissions. Please try again tomorrow.', 'बहुत अधिक सबमिशन। कृपया कल पुन: प्रयास करें।'));
+        } else {
+          toast.error(data.error || t('Failed to submit feedback', 'फीडबैक भेजने में विफल'));
+        }
+      } else {
+        toast.success(t('Feedback sent successfully!', 'फीडबैक सफलतापूर्वक भेजा गया!'));
+        setName('');
+        setEmail('');
+        setMessage('');
+      }
+    } catch {
+      toast.error(t('Failed to submit feedback', 'फीडबैक भेजने में विफल'));
     }
     setLoading(false);
   };
@@ -62,7 +75,7 @@ export function FeedbackForm() {
         <Card className="bg-gray-900 border-white/10 p-6">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">{t('Name', 'नाम')}</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">{t('Name', 'नाम')} <span className="text-red-400">*</span></label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -72,18 +85,20 @@ export function FeedbackForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">{t('Email', 'ईमेल')}</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                {t('Email (Optional)', 'ईमेल (वैकल्पिक)')}
+              </label>
               <Input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={t('Your email address', 'आपका ईमेल पता')}
+                placeholder={t('Your email address (optional)', 'आपका ईमेल पता (वैकल्पिक)')}
                 className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
-                required
               />
+              <p className="text-gray-500 text-xs mt-1">{t('Provide email if you want us to follow up', 'यदि आप चाहते हैं कि हम आपसे संपर्क करें तो ईमेल दें')}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">{t('Message', 'संदेश')}</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">{t('Message', 'संदेश')} <span className="text-red-400">*</span></label>
               <Textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}

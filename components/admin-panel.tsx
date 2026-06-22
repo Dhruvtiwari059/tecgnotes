@@ -237,8 +237,17 @@ export function AdminPanel() {
 
     setUploading(true);
 
-    const isPdf = file.type === 'application/pdf';
-    const fileType = isPdf ? 'pdf' : 'image';
+    // Determine file type with fallback
+    const mimeType = file.type || '';
+    const isPdf = mimeType === 'application/pdf';
+    const isImage = mimeType.startsWith('image/');
+    const fileExt = file.name.split('.').pop()?.toLowerCase() || '';
+    let fileType = 'file'; // default fallback
+    if (isPdf || fileExt === 'pdf') {
+      fileType = 'pdf';
+    } else if (isImage || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExt)) {
+      fileType = 'image';
+    }
 
     const fileUrl = await uploadFileToStorage(file, contentSection);
     if (!fileUrl) {
@@ -315,6 +324,7 @@ export function AdminPanel() {
     const insertData: any = {
       section: contentSection,
       content_type: 'text',
+      file_type: 'text', // Explicit type for text content
       file_name: textTitle || selectedSubject?.name || subjectName || 'Text Content',
       text_content: textContent,
       uploaded_by: user.email,
