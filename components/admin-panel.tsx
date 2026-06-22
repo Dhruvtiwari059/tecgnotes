@@ -17,8 +17,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Shield, Lock, Users, BookOpen, FileText, KeyRound, Trash2, Plus, X, LogIn, Upload, FolderOpen, Loader as Loader2, Eye, File, Code as Code2, Briefcase, Type } from 'lucide-react';
+import { Shield, Lock, Users, BookOpen, FileText, KeyRound, Trash2, Plus, X, LogIn, Upload, FolderOpen, Loader as Loader2, Eye, File, Code as Code2, Briefcase, Type, Pencil, Save } from 'lucide-react';
 
 interface FeedbackRow {
   id: string;
@@ -39,6 +46,7 @@ interface ContentFile {
   id: string;
   section: string;
   subject_name: string | null;
+  subject_id: string | null;
   file_name: string;
   file_url: string | null;
   file_type: string | null;
@@ -53,6 +61,12 @@ interface ContentFile {
   is_questions_pdf: boolean;
   company: string | null;
   category: string | null;
+}
+
+interface Subject {
+  id: string;
+  name: string;
+  code: string | null;
 }
 
 const SECTION_LABELS: Record<string, { en: string; hi: string; icon: React.ReactNode }> = {
@@ -77,6 +91,8 @@ export function AdminPanel() {
   const [contentFiles, setContentFiles] = useState<ContentFile[]>([]);
   const [uploading, setUploading] = useState(false);
   const [subjectName, setSubjectName] = useState('');
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string>('');
+  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [unitNumber, setUnitNumber] = useState('');
   const [pyqYear, setPyqYear] = useState('');
   const [company, setCompany] = useState('');
@@ -93,6 +109,20 @@ export function AdminPanel() {
   const [textContent, setTextContent] = useState('');
   const [textTitle, setTextTitle] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // Edit state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingFile, setEditingFile] = useState<ContentFile | null>(null);
+  const [editSubjectId, setEditSubjectId] = useState<string>('');
+  const [editPyqYear, setEditPyqYear] = useState('');
+  const [editUnitNumber, setEditUnitNumber] = useState('');
+  const [editAnswerPdfUrl, setEditAnswerPdfUrl] = useState<string | null>(null);
+  const [editUploadingAnswer, setEditUploadingAnswer] = useState(false);
+  const editAnswerRef = useRef<HTMLInputElement>(null);
+  const [editSaving, setEditSaving] = useState(false);
+  const editFileRef = useRef<HTMLInputElement>(null);
+  const [editFileUrl, setEditFileUrl] = useState<string | null>(null);
+  const [editUploadingFile, setEditUploadingFile] = useState(false);
 
   useEffect(() => {
     async function checkAdmin() {
@@ -125,7 +155,16 @@ export function AdminPanel() {
   useEffect(() => {
     if (!isAdmin || activeTab !== 'content') return;
     loadContentFiles(contentSection);
+    loadSubjects();
   }, [isAdmin, activeTab, contentSection]);
+
+  const loadSubjects = async () => {
+    const { data } = await supabase
+      .from('subjects')
+      .select('id, name, code')
+      .order('name');
+    setSubjects(data || []);
+  };
 
   const loadContentFiles = async (section: string) => {
     const { data } = await supabase
@@ -171,10 +210,10 @@ export function AdminPanel() {
     }
   };
 
-  const uploadFile = async (file: File): Promise<string | null> => {
+  const uploadFileToStorage = async (file: File, section: string): Promise<string | null> => {
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-    const filePath = `${contentSection}/${fileName}`;
+    const filePath = `${section}/${fileName}`;
 
     const { error } = await supabase.storage
       .from('notes-files')
@@ -198,18 +237,16 @@ export function AdminPanel() {
 
     setUploading(true);
 
-    // Determine file type
     const isPdf = file.type === 'application/pdf';
     const fileType = isPdf ? 'pdf' : 'image';
 
-    // Upload file to storage
-    const fileUrl = await uploadFile(file);
+    const fileUrl = await uploadFileToStorage(file, contentSection);
     if (!fileUrl) {
       setUploading(false);
       return;
     }
 
-    // Build insert data based on section
+    const selectedSubject = subjects.find(s => s.id === selectedSubjectId);
     const insertData: any = {
       section: contentSection,
       content_type: 'file',
@@ -220,10 +257,12 @@ export function AdminPanel() {
     };
 
     if (contentSection === 'notes') {
-      insertData.subject_name = subjectName || null;
+      insertData.subject_name = selectedSubject?.name || subjectName || null;
+      insertData.subject_id = selectedSubjectId || null;
       insertData.unit_number = unitNumber ? parseInt(unitNumber) : null;
     } else if (contentSection === 'pyq') {
-      insertData.subject_name = subjectName || null;
+      insertData.subject_name = selectedSubject?.name || subjectName || null;
+      insertData.subject_id = selectedSubjectId || null;
       insertData.pyq_year = pyqYear || null;
       insertData.answer_pdf_url = answerPdfUrl;
     } else if (contentSection === 'dsa') {
@@ -243,19 +282,25 @@ export function AdminPanel() {
     } else {
       toast.success(t('File uploaded successfully', 'फाइल सफलतापूर्वक अपलोड की गई'));
       loadContentFiles(contentSection);
-      // Reset form
-      if (fileInputRef.current) fileInputRef.current.value = '';
-      setSubjectName('');
-      setUnitNumber('');
-      setPyqYear('');
-      setCompany('');
-      setCategory('');
-      setIsNotesPdf(false);
-      setIsQuestionsPdf(false);
-      setAnswerPdfUrl(null);
+      resetForm();
     }
 
     setUploading(false);
+  };
+
+  const resetForm = () => {
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    setSubjectName('');
+    setSelectedSubjectId('');
+    setUnitNumber('');
+    setPyqYear('');
+    setCompany('');
+    setCategory('');
+    setIsNotesPdf(false);
+    setIsQuestionsPdf(false);
+    setAnswerPdfUrl(null);
+    setTextContent('');
+    setTextTitle('');
   };
 
   const handleTextSave = async () => {
@@ -266,19 +311,22 @@ export function AdminPanel() {
 
     setSaving(true);
 
+    const selectedSubject = subjects.find(s => s.id === selectedSubjectId);
     const insertData: any = {
       section: contentSection,
       content_type: 'text',
-      file_name: textTitle || subjectName || 'Text Content',
+      file_name: textTitle || selectedSubject?.name || subjectName || 'Text Content',
       text_content: textContent,
       uploaded_by: user.email,
     };
 
     if (contentSection === 'notes') {
-      insertData.subject_name = subjectName || null;
+      insertData.subject_name = selectedSubject?.name || subjectName || null;
+      insertData.subject_id = selectedSubjectId || null;
       insertData.unit_number = unitNumber ? parseInt(unitNumber) : null;
     } else if (contentSection === 'pyq') {
-      insertData.subject_name = subjectName || null;
+      insertData.subject_name = selectedSubject?.name || subjectName || null;
+      insertData.subject_id = selectedSubjectId || null;
       insertData.pyq_year = pyqYear || null;
     } else if (contentSection === 'dsa') {
       insertData.subject_name = subjectName || null;
@@ -295,14 +343,7 @@ export function AdminPanel() {
     } else {
       toast.success(t('Content saved successfully', 'कंटेंट सफलतापूर्वक सेव किया गया'));
       loadContentFiles(contentSection);
-      // Reset form
-      setTextContent('');
-      setTextTitle('');
-      setSubjectName('');
-      setUnitNumber('');
-      setPyqYear('');
-      setCompany('');
-      setCategory('');
+      resetForm();
     }
 
     setSaving(false);
@@ -313,7 +354,7 @@ export function AdminPanel() {
     if (!file) return;
 
     setUploadingAnswer(true);
-    const url = await uploadFile(file);
+    const url = await uploadFileToStorage(file, contentSection);
     if (url) {
       setAnswerPdfUrl(url);
       toast.success(t('Answer PDF uploaded', 'उत्तर PDF अपलोड की गई'));
@@ -322,7 +363,6 @@ export function AdminPanel() {
   };
 
   const handleDeleteFile = async (file: ContentFile) => {
-    // Delete from storage if it's a file
     if (file.file_url) {
       const filePath = file.file_url.split('/notes-files/')[1];
       if (filePath) {
@@ -330,7 +370,6 @@ export function AdminPanel() {
       }
     }
 
-    // Delete from database
     const { error } = await supabase.from('content_files').delete().eq('id', file.id);
     if (error) {
       toast.error(error.message);
@@ -338,6 +377,84 @@ export function AdminPanel() {
       toast.success(t('Content deleted', 'कंटेंट हटा दिया गया'));
       setContentFiles(contentFiles.filter(f => f.id !== file.id));
     }
+  };
+
+  // Edit handlers
+  const openEditDialog = (file: ContentFile) => {
+    setEditingFile(file);
+    setEditSubjectId(file.subject_id || '');
+    setEditPyqYear(file.pyq_year || '');
+    setEditUnitNumber(file.unit_number?.toString() || '');
+    setEditAnswerPdfUrl(file.answer_pdf_url);
+    setEditFileUrl(file.file_url);
+    setEditDialogOpen(true);
+  };
+
+  const closeEditDialog = () => {
+    setEditDialogOpen(false);
+    setEditingFile(null);
+    setEditSubjectId('');
+    setEditPyqYear('');
+    setEditUnitNumber('');
+    setEditAnswerPdfUrl(null);
+    setEditFileUrl(null);
+  };
+
+  const handleEditFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editingFile) return;
+
+    setEditUploadingFile(true);
+    const url = await uploadFileToStorage(file, editingFile.section);
+    if (url) {
+      setEditFileUrl(url);
+      toast.success(t('File replaced', 'फाइल बदल दी गई'));
+    }
+    setEditUploadingFile(false);
+  };
+
+  const handleEditAnswerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editingFile) return;
+
+    setEditUploadingAnswer(true);
+    const url = await uploadFileToStorage(file, editingFile.section);
+    if (url) {
+      setEditAnswerPdfUrl(url);
+      toast.success(t('Answer PDF uploaded', 'उत्तर PDF अपलोड की गई'));
+    }
+    setEditUploadingAnswer(false);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingFile) return;
+
+    setEditSaving(true);
+    const selectedSubject = subjects.find(s => s.id === editSubjectId);
+
+    const updateData: any = {
+      subject_id: editSubjectId || null,
+      subject_name: selectedSubject?.name || editingFile.subject_name,
+      pyq_year: editPyqYear || null,
+      unit_number: editUnitNumber ? parseInt(editUnitNumber) : null,
+      answer_pdf_url: editAnswerPdfUrl,
+      file_url: editFileUrl,
+    };
+
+    const { error } = await supabase
+      .from('content_files')
+      .update(updateData)
+      .eq('id', editingFile.id);
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success(t('Content updated successfully', 'कंटेंट सफलतापूर्वक अपडेट किया गया'));
+      loadContentFiles(contentSection);
+      closeEditDialog();
+    }
+
+    setEditSaving(false);
   };
 
   if (loading) {
@@ -468,15 +585,34 @@ export function AdminPanel() {
                     </div>
                   </div>
 
+                  {(contentSection === 'notes' || contentSection === 'pyq') && subjects.length > 0 && (
+                    <div>
+                      <Label className="text-gray-300 text-sm">{t('Subject (Select from list)', 'विषय (सूची से चुनें)')}</Label>
+                      <Select value={selectedSubjectId} onValueChange={setSelectedSubjectId}>
+                        <SelectTrigger className="bg-white/5 border-white/10 text-white mt-1">
+                          <SelectValue placeholder={t('Select a subject...', 'विषय चुनें...')} />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-900 border-white/10 max-h-60">
+                          {subjects.map((sub) => (
+                            <SelectItem key={sub.id} value={sub.id} className="text-white hover:bg-white/10">
+                              {sub.name} {sub.code && `(${sub.code})`}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
                   {contentSection === 'notes' && (
                     <>
                       <div>
-                        <Label className="text-gray-300 text-sm">{t('Subject Name', 'विषय का नाम')}</Label>
+                        <Label className="text-gray-300 text-sm">{t('Subject Name (or type manually)', 'विषय का नाम (या मैन्युअल टाइप करें)')}</Label>
                         <Input
                           value={subjectName}
                           onChange={(e) => setSubjectName(e.target.value)}
                           placeholder={t('e.g., Data Structures', 'जैसे: डेटा स्ट्रक्चर')}
                           className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
+                          disabled={!!selectedSubjectId}
                         />
                       </div>
                       <div>
@@ -495,12 +631,13 @@ export function AdminPanel() {
                   {contentSection === 'pyq' && (
                     <>
                       <div>
-                        <Label className="text-gray-300 text-sm">{t('Subject Name', 'विषय का नाम')}</Label>
+                        <Label className="text-gray-300 text-sm">{t('Subject Name (or type manually)', 'विषय का नाम (या मैन्युअल टाइप करें)')}</Label>
                         <Input
                           value={subjectName}
                           onChange={(e) => setSubjectName(e.target.value)}
                           placeholder={t('e.g., Operating Systems', 'जैसे: ऑपरेटिंग सिस्टम')}
                           className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
+                          disabled={!!selectedSubjectId}
                         />
                       </div>
                       <div>
@@ -753,6 +890,14 @@ export function AdminPanel() {
                               <Button
                                 size="sm"
                                 variant="ghost"
+                                className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
+                                onClick={() => openEditDialog(file)}
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
                                 className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                                 onClick={() => handleDeleteFile(file)}
                               >
@@ -831,6 +976,146 @@ export function AdminPanel() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Edit Dialog */}
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent className="bg-gray-900 border-white/10 text-white max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="text-white flex items-center gap-2">
+                <Pencil className="w-5 h-5 text-[#F97316]" />
+                {t('Edit Content', 'कंटेंट एडिट करें')}
+              </DialogTitle>
+            </DialogHeader>
+
+            {editingFile && (
+              <div className="space-y-4 py-4">
+                <div className="bg-gray-800 rounded p-3">
+                  <p className="text-gray-400 text-sm">{t('File', 'फाइल')}: <span className="text-white">{editingFile.file_name}</span></p>
+                  <p className="text-gray-400 text-sm">{t('Type', 'प्रकार')}: <span className="text-white">{editingFile.content_type}</span></p>
+                </div>
+
+                {(editingFile.section === 'notes' || editingFile.section === 'pyq') && subjects.length > 0 && (
+                  <div>
+                    <Label className="text-gray-300 text-sm">{t('Subject', 'विषय')}</Label>
+                    <Select value={editSubjectId} onValueChange={setEditSubjectId}>
+                      <SelectTrigger className="bg-white/5 border-white/10 text-white mt-1">
+                        <SelectValue placeholder={t('Select a subject...', 'विषय चुनें...')} />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-900 border-white/10 max-h-60">
+                        {subjects.map((sub) => (
+                          <SelectItem key={sub.id} value={sub.id} className="text-white hover:bg-white/10">
+                            {sub.name} {sub.code && `(${sub.code})`}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {editingFile.section === 'notes' && (
+                  <div>
+                    <Label className="text-gray-300 text-sm">{t('Unit Number', 'यूनिट नंबर')}</Label>
+                    <Input
+                      type="number"
+                      value={editUnitNumber}
+                      onChange={(e) => setEditUnitNumber(e.target.value)}
+                      placeholder="1, 2, 3..."
+                      className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
+                    />
+                  </div>
+                )}
+
+                {editingFile.section === 'pyq' && (
+                  <>
+                    <div>
+                      <Label className="text-gray-300 text-sm">{t('Year', 'वर्ष')}</Label>
+                      <Input
+                        value={editPyqYear}
+                        onChange={(e) => setEditPyqYear(e.target.value)}
+                        placeholder="2023, 2024..."
+                        className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-300 text-sm">{t('Question Paper PDF', 'प्रश्न पत्र PDF')}</Label>
+                      {editFileUrl ? (
+                        <div className="flex items-center gap-2 mt-1 bg-blue-500/10 border border-blue-500/30 rounded px-3 py-2">
+                          <File className="w-4 h-4 text-blue-400" />
+                          <span className="text-blue-400 text-sm flex-1 truncate">{t('File attached', 'फाइल अटैच की गई')}</span>
+                          <Button size="sm" variant="ghost" className="text-gray-400 hover:text-white h-6" onClick={() => window.open(editFileUrl, '_blank')}>
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ) : null}
+                      <Button
+                        variant="outline"
+                        className="w-full border-white/10 text-gray-300 hover:bg-white/5 mt-2"
+                        onClick={() => editFileRef.current?.click()}
+                        disabled={editUploadingFile}
+                      >
+                        {editUploadingFile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                        {editFileUrl ? t('Replace File', 'फाइल बदलें') : t('Upload File', 'फाइल अपलोड करें')}
+                      </Button>
+                      <input
+                        ref={editFileRef}
+                        type="file"
+                        accept=".pdf,image/*"
+                        className="hidden"
+                        onChange={handleEditFileUpload}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-300 text-sm">{t('Answer PDF', 'उत्तर PDF')}</Label>
+                      {editAnswerPdfUrl ? (
+                        <div className="flex items-center gap-2 mt-1 bg-green-500/10 border border-green-500/30 rounded px-3 py-2">
+                          <File className="w-4 h-4 text-green-400" />
+                          <span className="text-green-400 text-sm flex-1 truncate">{t('Answer uploaded', 'उत्तर अपलोड किया')}</span>
+                          <Button size="sm" variant="ghost" className="text-gray-400 hover:text-white h-6" onClick={() => window.open(editAnswerPdfUrl, '_blank')}>
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button size="sm" variant="ghost" className="text-red-400 hover:text-red-300 h-6 w-6 p-0" onClick={() => setEditAnswerPdfUrl(null)}>
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          className="w-full border-white/10 text-gray-300 hover:bg-white/5 mt-1"
+                          onClick={() => editAnswerRef.current?.click()}
+                          disabled={editUploadingAnswer}
+                        >
+                          {editUploadingAnswer ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                          {t('Upload Answer PDF', 'उत्तर PDF अपलोड करें')}
+                        </Button>
+                      )}
+                      <input
+                        ref={editAnswerRef}
+                        type="file"
+                        accept=".pdf"
+                        className="hidden"
+                        onChange={handleEditAnswerUpload}
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button variant="outline" className="border-white/10 text-gray-300" onClick={closeEditDialog}>
+                {t('Cancel', 'रद्द करें')}
+              </Button>
+              <Button
+                className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white"
+                onClick={handleSaveEdit}
+                disabled={editSaving}
+              >
+                {editSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+                {t('Save Changes', 'बदलाव सेव करें')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </section>
   );
