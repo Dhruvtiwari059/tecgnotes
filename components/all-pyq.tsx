@@ -34,7 +34,7 @@ interface Subject {
 interface PyqItem {
   id: string;
   file_name: string;
-  pdf_url: string | null;
+  file_url: string | null;
   pyq_year: string | null;
   answer_pdf_url: string | null;
   content_type: string;
@@ -415,14 +415,14 @@ export function AllPYQ() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          {pyq.content_type === 'file' && pyq.pdf_url && (
+                          {pyq.content_type === 'file' && pyq.file_url && (
                             <>
-                              <Button size="sm" variant="ghost" className="text-gray-300 hover:text-white" onClick={() => window.open(pyq.pdf_url!, '_blank')}>
+                              <Button size="sm" variant="ghost" className="text-gray-300 hover:text-white" onClick={() => window.open(pyq.file_url!, '_blank')}>
                                 <Eye className="w-4 h-4 mr-1" />
                                 {t('View', 'देखें')}
                               </Button>
                               <Button size="sm" className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white" asChild>
-                                <a href={pyq.pdf_url!} download>
+                                <a href={pyq.file_url!} download>
                                   <Download className="w-4 h-4 mr-1" />
                                   {t('Download', 'डाउनलोड')}
                                 </a>
