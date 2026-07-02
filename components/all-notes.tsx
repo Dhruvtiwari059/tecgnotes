@@ -158,7 +158,7 @@ export function AllNotes() {
         .select('*')
         .eq('section', 'notes')
         .eq('subject_id', selectedSubject!.id)
-        .order('unit_number', { ascending: true, nullsFirst: false });
+        .order('unit_number', { ascending: false, nullsFirst: false });
       setNotes(data || []);
       setLoadingNotes(false);
     }
