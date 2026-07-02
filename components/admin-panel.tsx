@@ -25,7 +25,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Shield, Lock, Users, BookOpen, FileText, KeyRound, Trash2, Plus, X, LogIn, Upload, FolderOpen, Loader as Loader2, Eye, Download, File, Code as Code2, Briefcase, Type, Pencil, Save } from 'lucide-react';
+import { Shield, Lock, Users, BookOpen, FileText, KeyRound, Trash2, Plus, X, LogIn, Upload, FolderOpen, Loader as Loader2, Eye, Download, File, Code as Code2, Briefcase, Type, Pencil, Save, HelpCircle } from 'lucide-react';
 
 interface FeedbackRow {
   id: string;
@@ -74,6 +74,8 @@ const SECTION_LABELS: Record<string, { en: string; hi: string; icon: React.React
   pyq: { en: 'PYQ', hi: 'PYQ', icon: <BookOpen className="w-4 h-4" /> },
   dsa: { en: 'DSA', hi: 'DSA', icon: <Code2 className="w-4 h-4" /> },
   placement: { en: 'Placement', hi: 'प्लेसमेंट', icon: <Briefcase className="w-4 h-4" /> },
+  imp_questions: { en: 'Imp Questions', hi: 'महत्वपूर्ण प्रश्न', icon: <HelpCircle className="w-4 h-4" /> },
+  syllabus: { en: 'Syllabus', hi: 'सिलेबस', icon: <FileText className="w-4 h-4" /> },
 };
 
 export function AdminPanel() {
@@ -274,6 +276,13 @@ export function AdminPanel() {
       insertData.subject_id = selectedSubjectId || null;
       insertData.pyq_year = pyqYear || null;
       insertData.answer_pdf_url = answerPdfUrl;
+    } else if (contentSection === 'imp_questions') {
+      insertData.subject_name = selectedSubject?.name || subjectName || null;
+      insertData.subject_id = selectedSubjectId || null;
+      insertData.unit_number = unitNumber ? parseInt(unitNumber) : null;
+    } else if (contentSection === 'syllabus') {
+      insertData.subject_name = selectedSubject?.name || subjectName || null;
+      insertData.subject_id = selectedSubjectId || null;
     } else if (contentSection === 'dsa') {
       insertData.subject_name = subjectName || null;
       insertData.is_notes_pdf = isNotesPdf;
@@ -338,6 +347,13 @@ export function AdminPanel() {
       insertData.subject_name = selectedSubject?.name || subjectName || null;
       insertData.subject_id = selectedSubjectId || null;
       insertData.pyq_year = pyqYear || null;
+    } else if (contentSection === 'imp_questions') {
+      insertData.subject_name = selectedSubject?.name || subjectName || null;
+      insertData.subject_id = selectedSubjectId || null;
+      insertData.unit_number = unitNumber ? parseInt(unitNumber) : null;
+    } else if (contentSection === 'syllabus') {
+      insertData.subject_name = selectedSubject?.name || subjectName || null;
+      insertData.subject_id = selectedSubjectId || null;
     } else if (contentSection === 'dsa') {
       insertData.subject_name = subjectName || null;
     } else if (contentSection === 'placement') {
@@ -595,7 +611,7 @@ export function AdminPanel() {
                     </div>
                   </div>
 
-                  {(contentSection === 'notes' || contentSection === 'pyq') && subjects.length > 0 && (
+                  {(contentSection === 'notes' || contentSection === 'pyq' || contentSection === 'imp_questions' || contentSection === 'syllabus') && subjects.length > 0 && (
                     <div>
                       <Label className="text-gray-300 text-sm">{t('Subject (Select from list)', 'विषय (सूची से चुनें)')}</Label>
                       <Select value={selectedSubjectId} onValueChange={setSelectedSubjectId}>
@@ -636,6 +652,44 @@ export function AdminPanel() {
                         />
                       </div>
                     </>
+                  )}
+
+                  {contentSection === 'imp_questions' && (
+                    <>
+                      <div>
+                        <Label className="text-gray-300 text-sm">{t('Subject Name (or type manually)', 'विषय का नाम (या मैन्युअल टाइप करें)')}</Label>
+                        <Input
+                          value={subjectName}
+                          onChange={(e) => setSubjectName(e.target.value)}
+                          placeholder={t('e.g., Data Structures', 'जैसे: डेटा स्ट्रक्चर')}
+                          className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
+                          disabled={!!selectedSubjectId}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-gray-300 text-sm">{t('Unit Number', 'यूनिट नंबर')}</Label>
+                        <Input
+                          type="number"
+                          value={unitNumber}
+                          onChange={(e) => setUnitNumber(e.target.value)}
+                          placeholder="1, 2, 3..."
+                          className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {contentSection === 'syllabus' && (
+                    <div>
+                      <Label className="text-gray-300 text-sm">{t('Subject Name (or type manually)', 'विषय का नाम (या मैन्युअल टाइप करें)')}</Label>
+                      <Input
+                        value={subjectName}
+                        onChange={(e) => setSubjectName(e.target.value)}
+                        placeholder={t('e.g., Data Structures', 'जैसे: डेटा स्ट्रक्चर')}
+                        className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
+                        disabled={!!selectedSubjectId}
+                      />
+                    </div>
                   )}
 
                   {contentSection === 'pyq' && (

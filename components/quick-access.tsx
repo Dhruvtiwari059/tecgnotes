@@ -3,11 +3,13 @@
 import Link from 'next/link';
 import { useLanguage } from '@/lib/language';
 import { Card } from '@/components/ui/card';
-import { FileText, HelpCircle, Code2, Briefcase, MessageCircle } from 'lucide-react';
+import { FileText, CircleHelp as HelpCircle, Code as Code2, Briefcase, MessageCircle, Star, ScrollText } from 'lucide-react';
 
 const items = [
   { href: '/notes', label: 'Notes', labelHi: 'नोट्स', icon: FileText, color: 'text-blue-400', bg: 'bg-blue-400/10' },
   { href: '/pyq', label: 'PYQ', labelHi: 'पी.वाई.क्यू', icon: HelpCircle, color: 'text-green-400', bg: 'bg-green-400/10' },
+  { href: '/imp-questions', label: 'Imp Questions', labelHi: 'महत्वपूर्ण प्रश्न', icon: Star, color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
+  { href: '/syllabus', label: 'Syllabus', labelHi: 'सिलेबस', icon: ScrollText, color: 'text-cyan-400', bg: 'bg-cyan-400/10' },
   { href: '/dsa', label: 'DSA', labelHi: 'डीएसए', icon: Code2, color: 'text-red-400', bg: 'bg-red-400/10' },
   { href: '/placement', label: 'Placement', labelHi: 'प्लेसमेंट', icon: Briefcase, color: 'text-orange-400', bg: 'bg-orange-400/10' },
   { href: '/chatbot', label: 'AI Chatbot', labelHi: 'AI चैटबॉट', icon: MessageCircle, color: 'text-purple-400', bg: 'bg-purple-400/10' },
@@ -27,7 +29,7 @@ export function QuickAccess() {
             {t('Jump to your favorite section', 'अपने पसंदीदा सेक्शन पर जाएं')}
           </p>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
           {items.map((item) => (
             <Link href={item.href} key={item.href}>
               <Card className="group bg-gray-900 border-white/10 hover:border-white/20 hover:bg-gray-800 transition-all cursor-pointer p-6 flex flex-col items-center gap-3 text-center">

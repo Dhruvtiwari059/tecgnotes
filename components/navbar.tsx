@@ -6,10 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/lib/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  BookOpen, Search, Menu, X, Languages, GraduationCap,
-  Code2, Briefcase, MessageCircle, Mail, FileText, HelpCircle, Shield, Home
-} from 'lucide-react';
+import { BookOpen, Search, Menu, X, Languages, GraduationCap, Code as Code2, Briefcase, MessageCircle, Mail, FileText, CircleHelp as HelpCircle, Shield, Chrome as Home, Star, ScrollText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function Navbar() {
@@ -22,6 +19,8 @@ export default function Navbar() {
     { href: '/', label: t('Home', 'होम'), icon: Home },
     { href: '/notes', label: t('Notes', 'नोट्स'), icon: FileText },
     { href: '/pyq', label: t('PYQ', 'पी.वाई.क्यू'), icon: HelpCircle },
+    { href: '/imp-questions', label: t('Imp Questions', 'महत्वपूर्ण प्रश्न'), icon: Star },
+    { href: '/syllabus', label: t('Syllabus', 'सिलेबस'), icon: ScrollText },
     { href: '/dsa', label: t('DSA', 'डीएसए'), icon: Code2 },
     { href: '/placement', label: t('Placement', 'प्लेसमेंट'), icon: Briefcase },
     { href: '/chatbot', label: t('AI Chatbot', 'AI चैटबॉट'), icon: MessageCircle },
