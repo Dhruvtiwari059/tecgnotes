@@ -25,7 +25,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Shield, Lock, Users, BookOpen, FileText, KeyRound, Trash2, Plus, X, LogIn, Upload, FolderOpen, Loader as Loader2, Eye, File, Code as Code2, Briefcase, Type, Pencil, Save } from 'lucide-react';
+import { Shield, Lock, Users, BookOpen, FileText, KeyRound, Trash2, Plus, X, LogIn, Upload, FolderOpen, Loader as Loader2, Eye, Download, File, Code as Code2, Briefcase, Type, Pencil, Save } from 'lucide-react';
 
 interface FeedbackRow {
   id: string;
@@ -888,14 +888,34 @@ export function AdminPanel() {
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0">
                               {file.file_url && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="text-gray-400 hover:text-white"
-                                  onClick={() => window.open(file.file_url!, '_blank')}
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </Button>
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="text-gray-400 hover:text-white"
+                                    onClick={() => window.open(file.file_url!, '_blank')}
+                                    title={t('View', 'देखें')}
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="text-gray-400 hover:text-white"
+                                    onClick={() => {
+                                      const link = document.createElement('a');
+                                      link.href = file.file_url!;
+                                      link.download = file.file_name || 'download';
+                                      link.target = '_blank';
+                                      document.body.appendChild(link);
+                                      link.click();
+                                      document.body.removeChild(link);
+                                    }}
+                                    title={t('Download', 'डाउनलोड')}
+                                  >
+                                    <Download className="w-4 h-4" />
+                                  </Button>
+                                </>
                               )}
                               <Button
                                 size="sm"
