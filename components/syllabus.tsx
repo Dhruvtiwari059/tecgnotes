@@ -406,6 +406,12 @@ export function Syllabus() {
                             {t('View', 'देखें')}
                           </Button>
                         )}
+                        {(syllabusItem.file_type === 'docx' || syllabusItem.file_type === 'pptx' || syllabusItem.file_type === 'doc' || syllabusItem.file_type === 'ppt') && (
+                          <Button variant="outline" className="border-white/10 text-gray-300 hover:text-white" onClick={() => window.open(`https://docs.google.com/viewer?url=${encodeURIComponent(syllabusItem.file_url!)}`, '_blank')}>
+                            <Eye className="w-4 h-4 mr-1" />
+                            {t('View', 'देखें')}
+                          </Button>
+                        )}
                         <Button className="bg-[#F97316] hover:bg-[#F97316]/90 text-white" asChild>
                           <a href={syllabusItem.file_url!} download>
                             <Download className="w-4 h-4 mr-1" />

@@ -423,6 +423,12 @@ export function AllNotes() {
                                   {t('View', 'देखें')}
                                 </Button>
                               )}
+                              {(note.file_type === 'docx' || note.file_type === 'pptx' || note.file_type === 'doc' || note.file_type === 'ppt') && (
+                                <Button size="sm" variant="ghost" className="text-gray-300 hover:text-white" onClick={() => window.open(`https://docs.google.com/viewer?url=${encodeURIComponent(note.file_url!)}`, '_blank')}>
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  {t('View', 'देखें')}
+                                </Button>
+                              )}
                               <Button size="sm" className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white" asChild>
                                 <a href={note.file_url!} download>
                                   <Download className="w-4 h-4 mr-1" />
