@@ -268,6 +268,8 @@ export function AdminPanel() {
       const isImage = mimeType.startsWith('image/');
       const isDocx = mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
       const isPptx = mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+      const isDoc = mimeType === 'application/msword';
+      const isPpt = mimeType === 'application/vnd.ms-powerpoint';
       const fileExt = file.name.split('.').pop()?.toLowerCase() || '';
       let fileType = 'file'; // default fallback
       if (isPdf || fileExt === 'pdf') {
@@ -278,6 +280,10 @@ export function AdminPanel() {
         fileType = 'docx';
       } else if (isPptx || fileExt === 'pptx') {
         fileType = 'pptx';
+      } else if (isDoc || fileExt === 'doc') {
+        fileType = 'doc';
+      } else if (isPpt || fileExt === 'ppt') {
+        fileType = 'ppt';
       }
 
       // Update progress
@@ -904,7 +910,7 @@ export function AdminPanel() {
                       <input
                         ref={fileInputRef}
                         type="file"
-                        accept=".pdf,image/*,.docx,.pptx"
+                        accept=".pdf,image/*,.docx,.pptx,.doc,.ppt"
                         multiple
                         className="hidden"
                         onChange={handleFileUpload}
@@ -1248,7 +1254,7 @@ export function AdminPanel() {
                       <input
                         ref={editFileRef}
                         type="file"
-                        accept=".pdf,image/*,.docx,.pptx"
+                        accept=".pdf,image/*,.docx,.pptx,.doc,.ppt"
                         className="hidden"
                         onChange={handleEditFileUpload}
                       />
