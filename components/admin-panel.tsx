@@ -106,6 +106,9 @@ export function AdminPanel() {
   const [answerPdfUrl, setAnswerPdfUrl] = useState<string | null>(null);
   const [uploadingAnswer, setUploadingAnswer] = useState(false);
 
+  // Multi-file upload state
+  const [uploadingFiles, setUploadingFiles] = useState<Array<{ name: string; progress: number; status: 'pending' | 'uploading' | 'success' | 'error'; error?: string }>>([]);
+
   // Text content state
   const [contentType, setContentType] = useState<string>('file');
   const [textContent, setTextContent] = useState('');
@@ -234,82 +237,136 @@ export function AdminPanel() {
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
+    // Initialize upload state for all files
+    const initialUploadState = files.map(f => ({
+      name: f.name,
+      progress: 0,
+      status: 'pending' as const
+    }));
+    setUploadingFiles(initialUploadState);
     setUploading(true);
 
-    // Determine file type with fallback
-    const mimeType = file.type || '';
-    const isPdf = mimeType === 'application/pdf';
-    const isImage = mimeType.startsWith('image/');
-    const isDocx = mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-    const isPptx = mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
-    const fileExt = file.name.split('.').pop()?.toLowerCase() || '';
-    let fileType = 'file'; // default fallback
-    if (isPdf || fileExt === 'pdf') {
-      fileType = 'pdf';
-    } else if (isImage || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExt)) {
-      fileType = 'image';
-    } else if (isDocx || fileExt === 'docx') {
-      fileType = 'docx';
-    } else if (isPptx || fileExt === 'pptx') {
-      fileType = 'pptx';
-    }
-
-    const fileUrl = await uploadFileToStorage(file, contentSection);
-    if (!fileUrl) {
-      setUploading(false);
-      return;
-    }
-
     const selectedSubject = subjects.find(s => s.id === selectedSubjectId);
-    const insertData: any = {
-      section: contentSection,
-      content_type: 'file',
-      file_name: file.name,
-      file_url: fileUrl,
-      file_type: fileType,
-      uploaded_by: user.email,
-    };
+    let successCount = 0;
+    let errorCount = 0;
 
-    if (contentSection === 'notes') {
-      insertData.subject_name = selectedSubject?.name || subjectName || null;
-      insertData.subject_id = selectedSubjectId || null;
-      insertData.unit_number = unitNumber ? parseInt(unitNumber) : null;
-    } else if (contentSection === 'pyq') {
-      insertData.subject_name = selectedSubject?.name || subjectName || null;
-      insertData.subject_id = selectedSubjectId || null;
-      insertData.pyq_year = pyqYear || null;
-      insertData.answer_pdf_url = answerPdfUrl;
-    } else if (contentSection === 'imp_questions') {
-      insertData.subject_name = selectedSubject?.name || subjectName || null;
-      insertData.subject_id = selectedSubjectId || null;
-      insertData.unit_number = unitNumber ? parseInt(unitNumber) : null;
-    } else if (contentSection === 'syllabus') {
-      insertData.subject_name = selectedSubject?.name || subjectName || null;
-      insertData.subject_id = selectedSubjectId || null;
-    } else if (contentSection === 'dsa') {
-      insertData.subject_name = subjectName || null;
-      insertData.is_notes_pdf = isNotesPdf;
-      insertData.is_questions_pdf = isQuestionsPdf;
-    } else if (contentSection === 'placement') {
-      insertData.company = company || null;
-      insertData.category = category || null;
-      insertData.subject_name = subjectName || null;
+    // Process each file
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+
+      // Update status to uploading
+      setUploadingFiles(prev => prev.map((f, idx) =>
+        idx === i ? { ...f, status: 'uploading' as const, progress: 25 } : f
+      ));
+
+      // Determine file type with fallback
+      const mimeType = file.type || '';
+      const isPdf = mimeType === 'application/pdf';
+      const isImage = mimeType.startsWith('image/');
+      const isDocx = mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      const isPptx = mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || '';
+      let fileType = 'file'; // default fallback
+      if (isPdf || fileExt === 'pdf') {
+        fileType = 'pdf';
+      } else if (isImage || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExt)) {
+        fileType = 'image';
+      } else if (isDocx || fileExt === 'docx') {
+        fileType = 'docx';
+      } else if (isPptx || fileExt === 'pptx') {
+        fileType = 'pptx';
+      }
+
+      // Update progress
+      setUploadingFiles(prev => prev.map((f, idx) =>
+        idx === i ? { ...f, progress: 50 } : f
+      ));
+
+      const fileUrl = await uploadFileToStorage(file, contentSection);
+      if (!fileUrl) {
+        setUploadingFiles(prev => prev.map((f, idx) =>
+          idx === i ? { ...f, status: 'error' as const, error: 'Upload failed' } : f
+        ));
+        errorCount++;
+        continue;
+      }
+
+      // Update progress
+      setUploadingFiles(prev => prev.map((f, idx) =>
+        idx === i ? { ...f, progress: 75 } : f
+      ));
+
+      const insertData: any = {
+        section: contentSection,
+        content_type: 'file',
+        file_name: file.name,
+        file_url: fileUrl,
+        file_type: fileType,
+        uploaded_by: user.email,
+      };
+
+      if (contentSection === 'notes') {
+        insertData.subject_name = selectedSubject?.name || subjectName || null;
+        insertData.subject_id = selectedSubjectId || null;
+        insertData.unit_number = unitNumber ? parseInt(unitNumber) : null;
+      } else if (contentSection === 'pyq') {
+        insertData.subject_name = selectedSubject?.name || subjectName || null;
+        insertData.subject_id = selectedSubjectId || null;
+        insertData.pyq_year = pyqYear || null;
+        insertData.answer_pdf_url = answerPdfUrl;
+      } else if (contentSection === 'imp_questions') {
+        insertData.subject_name = selectedSubject?.name || subjectName || null;
+        insertData.subject_id = selectedSubjectId || null;
+        insertData.unit_number = unitNumber ? parseInt(unitNumber) : null;
+      } else if (contentSection === 'syllabus') {
+        insertData.subject_name = selectedSubject?.name || subjectName || null;
+        insertData.subject_id = selectedSubjectId || null;
+      } else if (contentSection === 'dsa') {
+        insertData.subject_name = subjectName || null;
+        insertData.is_notes_pdf = isNotesPdf;
+        insertData.is_questions_pdf = isQuestionsPdf;
+      } else if (contentSection === 'placement') {
+        insertData.company = company || null;
+        insertData.category = category || null;
+        insertData.subject_name = subjectName || null;
+      }
+
+      const { error } = await supabase.from('content_files').insert(insertData);
+
+      if (error) {
+        setUploadingFiles(prev => prev.map((f, idx) =>
+          idx === i ? { ...f, status: 'error' as const, error: error.message } : f
+        ));
+        errorCount++;
+      } else {
+        setUploadingFiles(prev => prev.map((f, idx) =>
+          idx === i ? { ...f, status: 'success' as const, progress: 100 } : f
+        ));
+        successCount++;
+      }
     }
 
-    const { error } = await supabase.from('content_files').insert(insertData);
-
-    if (error) {
-      toast.error(error.message);
+    // Show result toast
+    if (successCount === files.length) {
+      toast.success(t(`All ${successCount} files uploaded successfully`, `${successCount} फाइलें सफलतापूर्वक अपलोड की गईं`));
+    } else if (successCount > 0) {
+      toast.error(t(`${successCount} uploaded, ${errorCount} failed`, `${successCount} अपलोड हुईं, ${errorCount} विफल`));
     } else {
-      toast.success(t('File uploaded successfully', 'फाइल सफलतापूर्वक अपलोड की गई'));
-      loadContentFiles(contentSection);
-      resetForm();
+      toast.error(t('All uploads failed', 'सभी अपलोड विफल'));
     }
 
-    setUploading(false);
+    // Refresh the file list
+    loadContentFiles(contentSection);
+
+    // Clear upload state after a delay
+    setTimeout(() => {
+      setUploadingFiles([]);
+      setUploading(false);
+      resetForm();
+    }, 2000);
   };
 
   const resetForm = () => {
@@ -824,7 +881,7 @@ export function AdminPanel() {
 
                   {contentType === 'file' && (
                     <div className="pt-4 border-t border-white/10">
-                      <Label className="text-gray-300 text-sm">{t('Select File', 'फाइल चुनें')}</Label>
+                      <Label className="text-gray-300 text-sm">{t('Select Files', 'फाइलें चुनें')}</Label>
                       <Button
                         variant="outline"
                         className="w-full border-dashed border-white/20 text-gray-400 hover:text-white hover:border-white/40 mt-2 h-20"
@@ -832,11 +889,15 @@ export function AdminPanel() {
                         disabled={uploading}
                       >
                         {uploading ? (
-                          <Loader2 className="w-6 h-6 animate-spin" />
+                          <div className="text-center">
+                            <Loader2 className="w-6 h-6 animate-spin mx-auto mb-1" />
+                            <span className="text-sm">{t('Uploading...', 'अपलोड हो रहा है...')}</span>
+                          </div>
                         ) : (
                           <div className="text-center">
                             <Upload className="w-6 h-6 mx-auto mb-1" />
                             <span className="text-sm">{t('Click to upload PDF, Image, or Documents', 'PDF, इमेज, या डॉक्यूमेंट अपलोड करें')}</span>
+                            <span className="text-xs text-gray-500 block mt-1">{t('(Multiple files allowed)', '(एक से अधिक फाइलें)')}</span>
                           </div>
                         )}
                       </Button>
@@ -844,9 +905,47 @@ export function AdminPanel() {
                         ref={fileInputRef}
                         type="file"
                         accept=".pdf,image/*,.docx,.pptx"
+                        multiple
                         className="hidden"
                         onChange={handleFileUpload}
                       />
+
+                      {/* Multi-file upload progress */}
+                      {uploadingFiles.length > 0 && (
+                        <div className="mt-4 space-y-2">
+                          {uploadingFiles.map((f, idx) => (
+                            <div key={idx} className="bg-gray-800 rounded-lg p-3">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm text-white truncate max-w-[200px]">{f.name}</span>
+                                <span className={`text-xs px-2 py-0.5 rounded ${
+                                  f.status === 'success' ? 'bg-green-500/10 text-green-400' :
+                                  f.status === 'error' ? 'bg-red-500/10 text-red-400' :
+                                  f.status === 'uploading' ? 'bg-blue-500/10 text-blue-400' :
+                                  'bg-gray-500/10 text-gray-400'
+                                }`}>
+                                  {f.status === 'success' ? t('Done', 'पूर्ण') :
+                                   f.status === 'error' ? t('Failed', 'विफल') :
+                                   f.status === 'uploading' ? t('Uploading', 'अपलोडिंग') :
+                                   t('Pending', 'प्रतीक्षा')}
+                                </span>
+                              </div>
+                              <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full transition-all ${
+                                    f.status === 'success' ? 'bg-green-500' :
+                                    f.status === 'error' ? 'bg-red-500' :
+                                    'bg-[#F97316]'
+                                  }`}
+                                  style={{ width: `${f.progress}%` }}
+                                />
+                              </div>
+                              {f.error && (
+                                <p className="text-xs text-red-400 mt-1">{f.error}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
 
