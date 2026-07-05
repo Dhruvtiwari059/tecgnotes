@@ -35,6 +35,7 @@ interface SyllabusItem {
   id: string;
   file_name: string;
   file_url: string | null;
+  file_type: string | null;
   content_type: string;
   text_content: string | null;
 }
@@ -399,10 +400,12 @@ export function Syllabus() {
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {syllabusItem.content_type === 'file' && syllabusItem.file_url && (
                       <>
-                        <Button variant="outline" className="border-white/10 text-gray-300 hover:text-white" onClick={() => window.open(syllabusItem.file_url!, '_blank')}>
-                          <Eye className="w-4 h-4 mr-1" />
-                          {t('View', 'देखें')}
-                        </Button>
+                        {(syllabusItem.file_type === 'pdf' || syllabusItem.file_type === 'image') && (
+                          <Button variant="outline" className="border-white/10 text-gray-300 hover:text-white" onClick={() => window.open(syllabusItem.file_url!, '_blank')}>
+                            <Eye className="w-4 h-4 mr-1" />
+                            {t('View', 'देखें')}
+                          </Button>
+                        )}
                         <Button className="bg-[#F97316] hover:bg-[#F97316]/90 text-white" asChild>
                           <a href={syllabusItem.file_url!} download>
                             <Download className="w-4 h-4 mr-1" />

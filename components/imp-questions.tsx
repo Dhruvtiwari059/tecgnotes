@@ -35,6 +35,7 @@ interface ImpQuestionItem {
   id: string;
   file_name: string;
   file_url: string | null;
+  file_type: string | null;
   unit_number: number | null;
   content_type: string;
   text_content: string | null;
@@ -416,10 +417,12 @@ export function ImpQuestions() {
                         <div className="flex items-center gap-2 flex-shrink-0">
                           {q.content_type === 'file' && q.file_url && (
                             <>
-                              <Button size="sm" variant="ghost" className="text-gray-300 hover:text-white" onClick={() => window.open(q.file_url!, '_blank')}>
-                                <Eye className="w-4 h-4 mr-1" />
-                                {t('View', 'देखें')}
-                              </Button>
+                              {(q.file_type === 'pdf' || q.file_type === 'image') && (
+                                <Button size="sm" variant="ghost" className="text-gray-300 hover:text-white" onClick={() => window.open(q.file_url!, '_blank')}>
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  {t('View', 'देखें')}
+                                </Button>
+                              )}
                               <Button size="sm" className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white" asChild>
                                 <a href={q.file_url!} download>
                                   <Download className="w-4 h-4 mr-1" />

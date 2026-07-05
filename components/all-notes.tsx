@@ -35,6 +35,8 @@ interface NoteItem {
   id: string;
   file_name: string;
   pdf_url: string | null;
+  file_url: string | null;
+  file_type: string | null;
   unit_number: number | null;
   subject_name: string | null;
   content_type: string;
@@ -413,14 +415,16 @@ export function AllNotes() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          {note.content_type === 'file' && note.pdf_url && (
+                          {note.content_type === 'file' && note.file_url && (
                             <>
-                              <Button size="sm" variant="ghost" className="text-gray-300 hover:text-white" onClick={() => window.open(note.pdf_url!, '_blank')}>
-                                <Eye className="w-4 h-4 mr-1" />
-                                {t('View', 'देखें')}
-                              </Button>
+                              {(note.file_type === 'pdf' || note.file_type === 'image') && (
+                                <Button size="sm" variant="ghost" className="text-gray-300 hover:text-white" onClick={() => window.open(note.file_url!, '_blank')}>
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  {t('View', 'देखें')}
+                                </Button>
+                              )}
                               <Button size="sm" className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white" asChild>
-                                <a href={note.pdf_url!} download>
+                                <a href={note.file_url!} download>
                                   <Download className="w-4 h-4 mr-1" />
                                   {t('Download', 'डाउनलोड')}
                                 </a>

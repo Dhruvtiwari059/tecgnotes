@@ -25,7 +25,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Shield, Lock, Users, BookOpen, FileText, KeyRound, Trash2, Plus, X, LogIn, Upload, FolderOpen, Loader as Loader2, Eye, Download, File, Code as Code2, Briefcase, Type, Pencil, Save, HelpCircle } from 'lucide-react';
+import { Shield, Lock, Users, BookOpen, FileText, KeyRound, Trash2, Plus, X, LogIn, Upload, FolderOpen, Loader as Loader2, Eye, Download, File, Code as Code2, Briefcase, Type, Pencil, Save, CircleHelp as HelpCircle } from 'lucide-react';
 
 interface FeedbackRow {
   id: string;
@@ -243,12 +243,18 @@ export function AdminPanel() {
     const mimeType = file.type || '';
     const isPdf = mimeType === 'application/pdf';
     const isImage = mimeType.startsWith('image/');
+    const isDocx = mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    const isPptx = mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
     const fileExt = file.name.split('.').pop()?.toLowerCase() || '';
     let fileType = 'file'; // default fallback
     if (isPdf || fileExt === 'pdf') {
       fileType = 'pdf';
     } else if (isImage || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExt)) {
       fileType = 'image';
+    } else if (isDocx || fileExt === 'docx') {
+      fileType = 'docx';
+    } else if (isPptx || fileExt === 'pptx') {
+      fileType = 'pptx';
     }
 
     const fileUrl = await uploadFileToStorage(file, contentSection);
@@ -830,14 +836,14 @@ export function AdminPanel() {
                         ) : (
                           <div className="text-center">
                             <Upload className="w-6 h-6 mx-auto mb-1" />
-                            <span className="text-sm">{t('Click to upload PDF or Image', 'PDF या इमेज अपलोड करें')}</span>
+                            <span className="text-sm">{t('Click to upload PDF, Image, or Documents', 'PDF, इमेज, या डॉक्यूमेंट अपलोड करें')}</span>
                           </div>
                         )}
                       </Button>
                       <input
                         ref={fileInputRef}
                         type="file"
-                        accept=".pdf,image/*"
+                        accept=".pdf,image/*,.docx,.pptx"
                         className="hidden"
                         onChange={handleFileUpload}
                       />
@@ -1143,7 +1149,7 @@ export function AdminPanel() {
                       <input
                         ref={editFileRef}
                         type="file"
-                        accept=".pdf,image/*"
+                        accept=".pdf,image/*,.docx,.pptx"
                         className="hidden"
                         onChange={handleEditFileUpload}
                       />
