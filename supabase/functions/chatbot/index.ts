@@ -42,17 +42,17 @@ How it works:
 ➤ If target is larger, search right half
 ➤ Repeat until found or array exhausted"`;
 
-function buildGeminiPayload(messages: any[], hasImage: boolean) {
+function buildGeminiPayload(messages: any[]) {
   const contents = [];
   for (const m of messages) {
-    if (m.role === "user" && m.imageData) {
-      contents.push({
-        role: "user",
-        parts: [
-          { text: m.text || "Analyze this image." },
-          { inline_data: { mime_type: m.imageMime || "image/png", data: m.imageData } },
-        ],
-      });
+    if (m.role === "user" && m.attachments && m.attachments.length > 0) {
+      const parts: any[] = [{ text: m.text || "Analyze these files." }];
+      for (const att of m.attachments) {
+        parts.push({
+          inline_data: { mime_type: att.type || "application/octet-stream", data: att.data },
+        });
+      }
+      contents.push({ role: "user", parts });
     } else {
       contents.push({
         role: m.role === "assistant" ? "model" : "user",
@@ -68,7 +68,7 @@ function buildGeminiPayload(messages: any[], hasImage: boolean) {
 
   return {
     contents: [systemInstruction, ...contents],
-    generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
+    generationConfig: { temperature: 0.7, maxOutputTokens: 4096 },
   };
 }
 
@@ -129,8 +129,7 @@ Deno.serve(async (req: Request) => {
     const body = await req.json();
     const messages = body.messages || [];
     const clientKeyIndex = body.keyIndex ?? null;
-    const hasImage = messages.some((m: any) => m.imageData);
-    const payload = buildGeminiPayload(messages, hasImage);
+    const payload = buildGeminiPayload(messages);
 
     // If client specifies a key index, try that key first; otherwise try all in order
     let lastError = "";

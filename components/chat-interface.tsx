@@ -5,20 +5,27 @@ import { useLanguage } from '@/lib/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, User, Bot, ImagePlus, X, Loader as Loader2, KeyRound, Clock, Paperclip, Mic } from 'lucide-react';
+import { Send, User, Bot, ImagePlus, X, Loader as Loader2, KeyRound, Clock, Paperclip, Mic, FileText, FileIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 const KEY_COUNT = 6;
 const COOLDOWN_MS = 60 * 1000;
 const COOLDOWN_PREFIX = 'gemini_key_cooldown_';
-const PROTECTED_ADMIN_EMAIL = 'nareshtiwari967@gmail.com';
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+interface AttachedFile {
+  id: string;
+  name: string;
+  type: string;
+  data: string;
+  size: number;
+}
 
 interface Message {
   role: 'user' | 'assistant';
   text: string;
-  imageData?: string;
-  imageMime?: string;
+  attachments?: AttachedFile[];
 }
 
 interface KeyStatus {
@@ -81,6 +88,12 @@ function formatResponseText(text: string): React.ReactNode {
 
     return <p key={i} className="text-gray-200 my-0.5" dangerouslySetInnerHTML={{ __html: styledLine }} />;
   });
+}
+
+function getFileIcon(type: string) {
+  if (type.startsWith('image/')) return <ImagePlus className="w-4 h-4" />;
+  if (type === 'application/pdf') return <FileText className="w-4 h-4" />;
+  return <FileIcon className="w-4 h-4" />;
 }
 
 function getCooldownExpiry(index: number): number | null {
@@ -146,8 +159,7 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [imageData, setImageData] = useState<string | null>(null);
-  const [imageMime, setImageMime] = useState<string | null>(null);
+  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const [currentKeyIndex, setCurrentKeyIndex] = useState(0);
   const [keyStatuses, setKeyStatuses] = useState<KeyStatus[]>([]);
   const [waitSeconds, setWaitSeconds] = useState(0);
@@ -195,40 +207,60 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
     return () => clearInterval(interval);
   }, [isClient, waitingAllCooldown]);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 4 * 1024 * 1024) {
-      toast.error(t('Image too large. Max 4MB.', 'इमेज बहुत बड़ी है। अधिकतम 4MB।'));
-      return;
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach((file) => {
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(t('File too large. Max 10MB per file.', 'फाइल बहुत बड़ी है। अधिकतम 10MB प्रति फाइल।'));
+        return;
+      }
+
+      const allowedTypes = ['image/', 'application/pdf'];
+      if (!allowedTypes.some(type => file.type.startsWith(type) || file.type === type)) {
+        toast.error(t('Only images and PDF files allowed', 'केवल इमेज और PDF फाइलें अनुमत हैं'));
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = (reader.result as string).split(',')[1];
+        const attachedFile: AttachedFile = {
+          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          name: file.name,
+          type: file.type,
+          data: base64,
+          size: file.size,
+        };
+        setAttachedFiles(prev => [...prev, attachedFile]);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = (reader.result as string).split(',')[1];
-      setImageData(base64);
-      setImageMime(file.type);
-      toast.success(t('Image ready for upload', 'इमेज अपलोड के लिए तैयार'));
-    };
-    reader.readAsDataURL(file);
+  };
+
+  const removeAttachedFile = (id: string) => {
+    setAttachedFiles(prev => prev.filter(f => f.id !== id));
   };
 
   const handleSend = async () => {
-    if (!input.trim() && !imageData) return;
+    if (!input.trim() && attachedFiles.length === 0) return;
     if (waitingAllCooldown) return;
 
     const userMessage: Message = {
       role: 'user',
-      text: input.trim() || t('Analyze this image', 'इस इमेज का विश्लेषण करें'),
-      imageData: imageData || undefined,
-      imageMime: imageMime || undefined,
+      text: input.trim() || t('Analyze these files', 'इन फाइलों का विश्लेषण करें'),
+      attachments: attachedFiles.length > 0 ? attachedFiles : undefined,
     };
 
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setInput('');
     setLoading(true);
-    setImageData(null);
-    setImageMime(null);
 
     let keyIdx = getNextAvailableKeyIndex(currentKeyIndex);
     if (keyIdx === null) {
@@ -249,6 +281,7 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
       if (result.ok) {
         setMessages([...newMessages, { role: 'assistant', text: result.data.response || t('No response received.', 'कोई प्रतिक्रिया नहीं मिली।') }]);
         setLoading(false);
+        setAttachedFiles([]);
         return;
       }
 
@@ -268,6 +301,7 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
       toast.error(result.data.error || t('Failed to get response', 'प्रतिक्रिया प्राप्त करने में विफल'));
       setMessages([...newMessages, { role: 'assistant', text: t('Sorry, I am having trouble right now. Please try again later.', 'क्षमा करें, मुझे अभी समस्या हो रही है। कृपया बाद में पुनः प्रयास करें।') }]);
       setLoading(false);
+      setAttachedFiles([]);
       return;
     }
 
@@ -362,8 +396,21 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
                 {msg.role === 'user' ? <User className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4 text-white" />}
               </div>
               <div className={`max-w-[80%] rounded-xl px-4 py-3 text-sm leading-relaxed ${msg.role === 'user' ? 'bg-[#1E3A8A] text-white' : 'bg-gray-800 text-gray-200'}`}>
-                {msg.imageData && (
-                  <img src={`data:${msg.imageMime};base64,${msg.imageData}`} alt="uploaded" className="max-w-[200px] rounded-lg mb-2" />
+                {msg.attachments && msg.attachments.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {msg.attachments.map((att) => (
+                      <div key={att.id}>
+                        {att.type.startsWith('image/') ? (
+                          <img src={`data:${att.type};base64,${att.data}`} alt={att.name} className="max-w-[150px] rounded-lg" />
+                        ) : (
+                          <div className="flex items-center gap-2 px-2 py-1 bg-white/10 rounded-lg">
+                            <FileText className="w-4 h-4 text-[#F97316]" />
+                            <span className="text-xs truncate max-w-[100px]">{att.name}</span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 )}
                 <div className="prose prose-invert prose-sm max-w-none">
                   {msg.role === 'assistant' ? formatResponseText(msg.text) : <div className="whitespace-pre-wrap">{msg.text}</div>}
@@ -387,15 +434,25 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
         </div>
       </ScrollArea>
 
-      {imageData && (
-        <div className="flex items-center gap-2 mt-2 px-2">
-          <div className="relative">
-            <img src={`data:${imageMime};base64,${imageData}`} alt="preview" className="h-12 w-12 rounded object-cover" />
-            <button onClick={() => { setImageData(null); setImageMime(null); }} className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-              <X className="w-3 h-3 text-white" />
-            </button>
-          </div>
-          <span className="text-xs text-gray-400">{t('Image attached', 'इमेज अटैच की गई')}</span>
+      {/* Attached files preview */}
+      {attachedFiles.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 mt-2 px-2">
+          {attachedFiles.map((file) => (
+            <div key={file.id} className="flex items-center gap-2 px-3 py-2 bg-gray-800 rounded-lg border border-white/10 group">
+              {file.type.startsWith('image/') ? (
+                <img src={`data:${file.type};base64,${file.data}`} alt={file.name} className="w-10 h-10 rounded object-cover" />
+              ) : (
+                getFileIcon(file.type)
+              )}
+              <span className="text-xs text-gray-300 max-w-[120px] truncate">{file.name}</span>
+              <button
+                onClick={() => removeAttachedFile(file.id)}
+                className="w-5 h-5 rounded-full bg-red-500/20 hover:bg-red-500/40 flex items-center justify-center transition-colors"
+              >
+                <X className="w-3 h-3 text-red-400" />
+              </button>
+            </div>
+          ))}
         </div>
       )}
 
@@ -404,25 +461,17 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
         <input
           type="file"
           accept="image/*,.pdf"
+          multiple
           ref={fileInputRef}
           className="hidden"
-          onChange={handleImageUpload}
+          onChange={handleFileUpload}
         />
         <Button
           variant="ghost"
           size="icon"
           className="text-gray-400 hover:text-white hover:bg-white/10 rounded-full"
           onClick={() => fileInputRef.current?.click()}
-          title={t('Attach image/PDF', 'इमेज/PDF अटैच करें')}
-        >
-          <ImagePlus className="w-5 h-5" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-gray-400 hover:text-white hover:bg-white/10 rounded-full"
-          disabled
-          title={t('Attach file', 'फाइल अटैच करें')}
+          title={t('Attach files', 'फाइलें अटैच करें')}
         >
           <Paperclip className="w-5 h-5" />
         </Button>
@@ -430,6 +479,15 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
           variant="ghost"
           size="icon"
           className="text-gray-400 hover:text-white hover:bg-white/10 rounded-full"
+          onClick={() => fileInputRef.current?.click()}
+          title={t('Attach image', 'इमेज अटैच करें')}
+        >
+          <ImagePlus className="w-5 h-5" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-gray-400 hover:text-white hover:bg-white/10 rounded-full opacity-50"
           disabled
           title={t('Voice input', 'वॉइस इनपुट')}
         >
@@ -445,7 +503,7 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
         />
         <Button
           onClick={handleSend}
-          disabled={loading || waitingAllCooldown || (!input.trim() && !imageData)}
+          disabled={loading || waitingAllCooldown || (!input.trim() && attachedFiles.length === 0)}
           className="bg-[#F97316] hover:bg-[#F97316]/90 text-white rounded-full w-10 h-10"
           size="icon"
         >
