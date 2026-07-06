@@ -5,13 +5,14 @@ import { useLanguage } from '@/lib/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, User, Bot, ImagePlus, X, Loader as Loader2, KeyRound, Clock } from 'lucide-react';
+import { Send, User, Bot, ImagePlus, X, Loader as Loader2, KeyRound, Clock, Paperclip, Mic } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 const KEY_COUNT = 6;
 const COOLDOWN_MS = 60 * 1000;
 const COOLDOWN_PREFIX = 'gemini_key_cooldown_';
+const PROTECTED_ADMIN_EMAIL = 'nareshtiwari967@gmail.com';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -24,6 +25,62 @@ interface KeyStatus {
   index: number;
   onCooldown: boolean;
   remainingSeconds: number;
+}
+
+function formatResponseText(text: string): React.ReactNode {
+  const lines = text.split('\n');
+  return lines.map((line, i) => {
+    const trimmed = line.trim();
+
+    if (/^#{1,3}\s/.test(trimmed)) {
+      const level = trimmed.match(/^(#{1,3})/)?.[1]?.length || 1;
+      const content = trimmed.replace(/^#{1,3}\s*/, '');
+      const Tag = level === 1 ? 'h2' : level === 2 ? 'h3' : 'h4';
+      const sizeClass = level === 1 ? 'text-lg font-bold mt-4 mb-2' : level === 2 ? 'text-base font-semibold mt-3 mb-1' : 'text-sm font-medium mt-2 mb-1';
+      return <Tag key={i} className={`${sizeClass} text-white`}>{content}</Tag>;
+    }
+
+    if (/^[-*•]\s/.test(trimmed)) {
+      const content = trimmed.replace(/^[-*•]\s*/, '');
+      const styledContent = content
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*([^*]+)\*/g, '<em>$1</em>');
+      return (
+        <div key={i} className="flex items-start gap-2 my-1">
+          <span className="text-[#F97316] mt-1">✦</span>
+          <span className="text-gray-200" dangerouslySetInnerHTML={{ __html: styledContent }} />
+        </div>
+      );
+    }
+
+    if (/^\d+\.\s/.test(trimmed)) {
+      const content = trimmed.replace(/^\d+\.\s*/, '');
+      const styledContent = content
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*([^*]+)\*/g, '<em>$1</em>');
+      return (
+        <div key={i} className="flex items-start gap-2 my-1">
+          <span className="text-[#1E3A8A] font-medium min-w-[20px]">{line.match(/^\d+/)?.[0]}.</span>
+          <span className="text-gray-200" dangerouslySetInnerHTML={{ __html: styledContent }} />
+        </div>
+      );
+    }
+
+    if (trimmed.startsWith('━') || trimmed.startsWith('─') || trimmed.startsWith('═')) {
+      return <hr key={i} className="border-t border-gray-700 my-2" />;
+    }
+
+    if (trimmed === '') {
+      return <div key={i} className="h-2" />;
+    }
+
+    const styledLine = line
+      .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-white">$1</strong>')
+      .replace(/\*([^*]+)\*/g, '<em class="text-gray-300">$1</em>')
+      .replace(/`([^`]+)`/g, '<code class="bg-gray-700 px-1.5 py-0.5 rounded text-sm text-[#F97316]">$1</code>');
+
+    return <p key={i} className="text-gray-200 my-0.5" dangerouslySetInnerHTML={{ __html: styledLine }} />;
+  });
 }
 
 function getCooldownExpiry(index: number): number | null {
@@ -82,7 +139,7 @@ async function callChatbotAPI(messages: Message[], keyIndex: number) {
   return { ok: response.ok, status: response.status, data };
 }
 
-export function ChatInterface({ fullPage = false }: { fullPage?: boolean }) {
+export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?: boolean; isAdmin?: boolean }) {
   const { t } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([
     { role: 'assistant', text: t('Hi! I am TechNotes AI. Ask me anything about engineering subjects, or upload a PDF/image for analysis.', 'नमस्ते! मैं TechNotes AI हूँ। इंजीनियरिंग विषयों के बारे में कुछ भी पूछें, या विश्लेषण के लिए PDF/इमेज अपलोड करें।') },
@@ -228,60 +285,64 @@ export function ChatInterface({ fullPage = false }: { fullPage?: boolean }) {
 
   return (
     <div className={`flex flex-col ${fullPage ? 'max-w-4xl mx-auto h-[calc(100vh-200px)]' : 'h-full'}`}>
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-3 px-2">
+      {/* Header - Clean for students */}
+      <div className="flex items-center gap-3 mb-4 px-2">
         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1E3A8A] to-[#F97316] flex items-center justify-center">
           <Bot className="w-5 h-5 text-white" />
         </div>
         <div className="flex-1 min-w-0">
           <h2 className="text-lg font-bold text-white">TechNotes AI</h2>
-          <p className="text-xs text-gray-400">{t('Powered by Gemini 2.5 Flash', 'Gemini 2.5 Flash द्वारा संचालित')}</p>
+          <p className="text-xs text-gray-400">{t('Your AI study assistant', 'आपका AI अध्ययन सहायक')}</p>
         </div>
-        {/* Active key indicator */}
-        <div className="flex items-center gap-1.5 flex-shrink-0">
-          <KeyRound className="w-3 h-3 text-gray-400" />
-          <div className="flex gap-0.5">
-            {keyStatuses.map((status) => (
-              <div
-                key={status.index}
-                className={cn(
-                  'w-2 h-2 rounded-full',
-                  status.index === currentKeyIndex && !status.onCooldown
-                    ? 'bg-green-500 animate-pulse'
-                    : status.onCooldown
-                    ? 'bg-red-500'
-                    : 'bg-gray-600'
-                )}
-                title={`Key ${status.index + 1}${status.onCooldown ? ` (cooldown ${status.remainingSeconds}s)` : ''}`}
-              />
-            ))}
+        {/* Admin-only key indicator */}
+        {isAdmin && (
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <KeyRound className="w-3 h-3 text-gray-400" />
+            <div className="flex gap-0.5">
+              {keyStatuses.map((status) => (
+                <div
+                  key={status.index}
+                  className={cn(
+                    'w-2 h-2 rounded-full',
+                    status.index === currentKeyIndex && !status.onCooldown
+                      ? 'bg-green-500 animate-pulse'
+                      : status.onCooldown
+                      ? 'bg-red-500'
+                      : 'bg-gray-600'
+                  )}
+                  title={`Key ${status.index + 1}${status.onCooldown ? ` (cooldown ${status.remainingSeconds}s)` : ''}`}
+                />
+              ))}
+            </div>
+            <span className="text-[10px] text-gray-400 font-medium">
+              {keyStatuses[currentKeyIndex]?.onCooldown ? '--' : `Key ${currentKeyIndex + 1}`}
+            </span>
           </div>
-          <span className="text-[10px] text-gray-400 font-medium">
-            {keyStatuses[currentKeyIndex]?.onCooldown ? '--' : `Key ${currentKeyIndex + 1}`}
-          </span>
-        </div>
+        )}
       </div>
 
-      {/* Key status bar */}
-      <div className="flex items-center gap-1 mb-2 px-2 flex-wrap">
-        <span className="text-[10px] text-gray-500 font-medium">{t('API Keys:', 'API Keys:')}</span>
-        {keyStatuses.map((status) => (
-          <div
-            key={status.index}
-            className={cn(
-              'flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors border',
-              status.index === currentKeyIndex && !status.onCooldown
-                ? 'bg-green-500/20 text-green-400 border-green-500/40'
-                : status.onCooldown
-                ? 'bg-red-500/20 text-red-400 border-red-500/40'
-                : 'bg-gray-800/50 text-gray-500 border-gray-700/40'
-            )}
-          >
-            <span>{status.index + 1}</span>
-            {status.onCooldown && <span className="text-[8px] opacity-80">{status.remainingSeconds}s</span>}
-          </div>
-        ))}
-      </div>
+      {/* Admin-only key status bar */}
+      {isAdmin && (
+        <div className="flex items-center gap-1 mb-2 px-2 flex-wrap">
+          <span className="text-[10px] text-gray-500 font-medium">{t('API Keys:', 'API Keys:')}</span>
+          {keyStatuses.map((status) => (
+            <div
+              key={status.index}
+              className={cn(
+                'flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors border',
+                status.index === currentKeyIndex && !status.onCooldown
+                  ? 'bg-green-500/20 text-green-400 border-green-500/40'
+                  : status.onCooldown
+                  ? 'bg-red-500/20 text-red-400 border-red-500/40'
+                  : 'bg-gray-800/50 text-gray-500 border-gray-700/40'
+              )}
+            >
+              <span>{status.index + 1}</span>
+              {status.onCooldown && <span className="text-[8px] opacity-80">{status.remainingSeconds}s</span>}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Wait countdown */}
       {waitingAllCooldown && (
@@ -304,7 +365,9 @@ export function ChatInterface({ fullPage = false }: { fullPage?: boolean }) {
                 {msg.imageData && (
                   <img src={`data:${msg.imageMime};base64,${msg.imageData}`} alt="uploaded" className="max-w-[200px] rounded-lg mb-2" />
                 )}
-                <div className="whitespace-pre-wrap">{msg.text}</div>
+                <div className="prose prose-invert prose-sm max-w-none">
+                  {msg.role === 'assistant' ? formatResponseText(msg.text) : <div className="whitespace-pre-wrap">{msg.text}</div>}
+                </div>
               </div>
             </div>
           ))}
@@ -316,7 +379,7 @@ export function ChatInterface({ fullPage = false }: { fullPage?: boolean }) {
               <div className="bg-gray-800 rounded-xl px-4 py-3">
                 <div className="flex items-center gap-2">
                   <Loader2 className="w-4 h-4 text-[#F97316] animate-spin" />
-                  <span className="text-xs text-gray-400">Key {currentKeyIndex + 1}...</span>
+                  <span className="text-xs text-gray-400">{t('Thinking...', 'सोच रहा हूँ...')}</span>
                 </div>
               </div>
             </div>
@@ -336,7 +399,8 @@ export function ChatInterface({ fullPage = false }: { fullPage?: boolean }) {
         </div>
       )}
 
-      <div className="flex items-center gap-2 mt-4 px-2">
+      {/* Clean input bar */}
+      <div className="flex items-center gap-2 mt-4 p-2 rounded-full bg-gray-900/80 border border-white/10">
         <input
           type="file"
           accept="image/*,.pdf"
@@ -347,23 +411,42 @@ export function ChatInterface({ fullPage = false }: { fullPage?: boolean }) {
         <Button
           variant="ghost"
           size="icon"
-          className="text-gray-400 hover:text-white hover:bg-white/10"
+          className="text-gray-400 hover:text-white hover:bg-white/10 rounded-full"
           onClick={() => fileInputRef.current?.click()}
+          title={t('Attach image/PDF', 'इमेज/PDF अटैच करें')}
         >
           <ImagePlus className="w-5 h-5" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-gray-400 hover:text-white hover:bg-white/10 rounded-full"
+          disabled
+          title={t('Attach file', 'फाइल अटैच करें')}
+        >
+          <Paperclip className="w-5 h-5" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-gray-400 hover:text-white hover:bg-white/10 rounded-full"
+          disabled
+          title={t('Voice input', 'वॉइस इनपुट')}
+        >
+          <Mic className="w-5 h-5" />
         </Button>
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={t('Type your question...', 'अपना प्रश्न लिखें...')}
-          className="flex-1 bg-white/5 border-white/10 text-white placeholder:text-gray-500"
+          placeholder={t('Ask me anything...', 'मुझसे कुछ भी पूछें...')}
+          className="flex-1 bg-transparent border-none text-white placeholder:text-gray-500 focus-visible:ring-0 focus-visible:ring-offset-0"
           disabled={loading || waitingAllCooldown}
         />
         <Button
           onClick={handleSend}
           disabled={loading || waitingAllCooldown || (!input.trim() && !imageData)}
-          className="bg-[#F97316] hover:bg-[#F97316]/90 text-white"
+          className="bg-[#F97316] hover:bg-[#F97316]/90 text-white rounded-full w-10 h-10"
           size="icon"
         >
           <Send className="w-4 h-4" />

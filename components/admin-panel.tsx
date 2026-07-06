@@ -1151,23 +1151,29 @@ export function AdminPanel() {
             </Card>
 
             <div className="space-y-3">
-              {adminList.map((admin) => (
-                <Card key={admin.id} className="bg-gray-900 border-white/10 p-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-white font-medium">{admin.email}</p>
-                    <p className="text-gray-500 text-xs">{t('Added by', 'जोड़ा गया')}: {admin.added_by || 'system'} | {new Date(admin.created_at).toLocaleDateString()}</p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                    onClick={() => handleDeleteAdmin(admin.id)}
-                    disabled={admin.email === user.email}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </Card>
-              ))}
+              {adminList.map((admin) => {
+                const isProtectedAdmin = admin.email === 'nareshtiwari967@gmail.com';
+                const isCurrentUser = admin.email === user?.email;
+                const canDelete = !isProtectedAdmin && !isCurrentUser;
+                return (
+                  <Card key={admin.id} className="bg-gray-900 border-white/10 p-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-white font-medium">{admin.email}</p>
+                      <p className="text-gray-500 text-xs">{t('Added by', 'जोड़ा गया')}: {admin.added_by || 'system'} | {new Date(admin.created_at).toLocaleDateString()}</p>
+                    </div>
+                    {canDelete && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                        onClick={() => handleDeleteAdmin(admin.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </Card>
+                );
+              })}
             </div>
           </TabsContent>
         </Tabs>

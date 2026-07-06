@@ -22,7 +22,7 @@ export function FloatingChat() {
 
       {open && (
         <div className="fixed bottom-24 right-6 z-50 w-[380px] h-[520px] bg-black border border-white/10 rounded-2xl shadow-2xl flex flex-col p-4 overflow-hidden">
-          <ChatInterface />
+          <ChatInterface isAdmin={false} />
         </div>
       )}
     </>
