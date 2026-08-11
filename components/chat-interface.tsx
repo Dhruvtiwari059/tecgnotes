@@ -5,7 +5,7 @@ import { useLanguage } from '@/lib/language';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, User, Bot, ImagePlus, X, Loader as Loader2, KeyRound, Clock, Paperclip, Mic, FileText, FileIcon } from 'lucide-react';
+import { Send, User, Bot, ImagePlus, X, Loader as Loader2, KeyRound, Clock, Paperclip, Mic, FileText, File as FileIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -155,7 +155,7 @@ async function callChatbotAPI(messages: Message[], keyIndex: number) {
 export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?: boolean; isAdmin?: boolean }) {
   const { t } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', text: t('Hi! I am TechNotes AI. Ask me anything about engineering subjects, or upload a PDF/image for analysis.', 'नमस्ते! मैं TechNotes AI हूँ। इंजीनियरिंग विषयों के बारे में कुछ भी पूछें, या विश्लेषण के लिए PDF/इमेज अपलोड करें।') },
+    { role: 'assistant', text: t('Hi! I am TechNotes AI. Ask me anything about any engineering subject — CSE, Civil, Electrical, Electronics, Mechanical, or upload a PDF/image for analysis.', 'नमस्ते! मैं TechNotes AI हूँ। किसी भी इंजीनियरिंग विषय — CSE, सिविल, इलेक्ट्रिकल, इलेक्ट्रॉनिक्स, मैकेनिकल — के बारे में पूछें, या विश्लेषण के लिए PDF/इमेज अपलोड करें।') },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
