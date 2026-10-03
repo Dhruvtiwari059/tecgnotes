@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function DsaPage() {
   return (
-    <main className="min-h-screen bg-black">
+    <main className="min-h-screen bg-background">
       <Navbar />
       <DsaList />
       <Footer />

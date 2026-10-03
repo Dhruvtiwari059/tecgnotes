@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: { params: { year: string; bra
 
 export default function BranchPage({ params }: { params: { year: string; branch: string } }) {
   return (
-    <main className="min-h-screen bg-black">
+    <main className="min-h-screen bg-background">
       <Navbar />
       <SemesterSelector year={parseInt(params.year)} branch={params.branch} />
       <Footer />

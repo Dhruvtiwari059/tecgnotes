@@ -16,34 +16,34 @@ export function BranchSelector({ year }: { year: number }) {
   const labels = ['First', 'Second', 'Third', 'Fourth'];
 
   return (
-    <section className="pt-24 pb-16 md:pt-32 md:pb-24 bg-black">
+    <section className="pt-24 pb-16 md:pt-32 md:pb-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm mb-6">
+          <Link href="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm mb-6">
             <ArrowLeft className="w-4 h-4" />
             {t('Back to Home', 'होम पर वापस')}
           </Link>
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
             {t(`${labels[year - 1]} Year`, `${labels[year - 1]} Year`)} {t('— Select Branch', '— ब्रांच चुनें')}
           </h1>
-          <p className="text-gray-400 text-lg">
+          <p className="text-muted-foreground text-lg">
             {t('Choose your branch to continue', 'जारी रखने के लिए अपनी ब्रांच चुनें')}
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {branches.map((branch) => (
             <Link href={`/year/${year}/${branch.slug}`} key={branch.slug}>
-              <Card className="group relative overflow-hidden bg-gray-900 border-white/10 hover:border-white/20 transition-all duration-300 hover:scale-[1.02] cursor-pointer p-8">
+              <Card className="group relative overflow-hidden bg-card border-border hover:border-border transition-all duration-300 hover:scale-[1.02] cursor-pointer p-8">
                 <div className={`absolute inset-0 bg-gradient-to-br ${branch.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
                 <div className="relative flex flex-col items-center gap-4">
                   <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${branch.color} flex items-center justify-center shadow-lg`}>
-                    <branch.icon className="w-8 h-8 text-white" />
+                    <branch.icon className="w-8 h-8 text-foreground" />
                   </div>
                   <div className="text-center">
-                    <h3 className="text-xl font-bold text-white group-hover:text-[#F97316] transition-colors">
+                    <h3 className="text-xl font-bold text-foreground group-hover:text-accent transition-colors">
                       {t(branch.name, branch.nameHi)}
                     </h3>
-                    <p className="text-gray-400 text-sm mt-1 uppercase tracking-wider">{branch.slug}</p>
+                    <p className="text-muted-foreground text-sm mt-1 uppercase tracking-wider">{branch.slug}</p>
                   </div>
                 </div>
               </Card>

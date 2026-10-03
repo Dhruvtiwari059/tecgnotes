@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function FeedbackPage() {
   return (
-    <main className="min-h-screen bg-black">
+    <main className="min-h-screen bg-background">
       <Navbar />
       <FeedbackForm />
       <Footer />

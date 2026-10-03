@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: { year: string } })
 export default function YearPage({ params }: { params: { year: string } }) {
   const yearNum = parseInt(params.year, 10);
   return (
-    <main className="min-h-screen bg-black">
+    <main className="min-h-screen bg-background">
       <Navbar />
       <BranchSelector year={yearNum} />
       <Footer />

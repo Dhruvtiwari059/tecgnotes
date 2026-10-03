@@ -23,7 +23,7 @@ export default function ChatbotPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-black flex flex-col">
+    <main className="min-h-screen bg-background flex flex-col">
       <Navbar />
       <div className="flex-1 pt-24 pb-16">
         <ChatInterface fullPage isAdmin={isAdmin} />

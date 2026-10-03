@@ -4,7 +4,7 @@ import { SubjectDetail } from '@/components/subject-detail';
 
 export default function SubjectPage({ params }: { params: { slug: string } }) {
   return (
-    <main className="min-h-screen bg-black">
+    <main className="min-h-screen bg-background">
       <Navbar />
       <SubjectDetail slug={params.slug} />
       <Footer />

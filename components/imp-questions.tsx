@@ -45,23 +45,23 @@ function renderTextContent(text: string): React.ReactNode {
   const lines = text.split('\n');
   return lines.map((line, i) => {
     if (line.startsWith('### ')) {
-      return <h4 key={i} className="text-md font-bold text-white mt-4 mb-2">{line.slice(4)}</h4>;
+      return <h4 key={i} className="text-md font-bold text-foreground mt-4 mb-2">{line.slice(4)}</h4>;
     }
     if (line.startsWith('## ')) {
-      return <h3 key={i} className="text-lg font-bold text-white mt-4 mb-2">{line.slice(3)}</h3>;
+      return <h3 key={i} className="text-lg font-bold text-foreground mt-4 mb-2">{line.slice(3)}</h3>;
     }
     if (line.startsWith('# ')) {
-      return <h2 key={i} className="text-xl font-bold text-white mt-4 mb-2">{line.slice(2)}</h2>;
+      return <h2 key={i} className="text-xl font-bold text-foreground mt-4 mb-2">{line.slice(2)}</h2>;
     }
     let processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    processedLine = processedLine.replace(/`(.*?)`/g, '<code class="bg-gray-700 px-1 rounded text-sm">$1</code>');
+    processedLine = processedLine.replace(/`(.*?)`/g, '<code class="bg-code-bg px-1 rounded text-sm">$1</code>');
     if (line.startsWith('- ')) {
-      return <li key={i} className="text-gray-300 ml-4" dangerouslySetInnerHTML={{ __html: processedLine.slice(2) }} />;
+      return <li key={i} className="text-muted-foreground ml-4" dangerouslySetInnerHTML={{ __html: processedLine.slice(2) }} />;
     }
     if (line.trim() === '') {
       return <br key={i} />;
     }
-    return <p key={i} className="text-gray-300 mb-1" dangerouslySetInnerHTML={{ __html: processedLine }} />;
+    return <p key={i} className="text-muted-foreground mb-1" dangerouslySetInnerHTML={{ __html: processedLine }} />;
   });
 }
 
@@ -182,12 +182,12 @@ export function ImpQuestions() {
 
   if (loading) {
     return (
-      <section className="pt-24 pb-16 md:pt-32 md:pb-24 bg-black min-h-screen">
+      <section className="pt-24 pb-16 md:pt-32 md:pb-24 bg-background min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Skeleton className="h-10 w-64 bg-gray-800 mb-8" />
+          <Skeleton className="h-10 w-64 bg-secondary mb-8" />
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-24 bg-gray-800" />
+              <Skeleton key={i} className="h-24 bg-secondary" />
             ))}
           </div>
         </div>
@@ -196,18 +196,18 @@ export function ImpQuestions() {
   }
 
   return (
-    <section className="pt-24 pb-16 md:pt-32 md:pb-24 bg-black min-h-screen">
+    <section className="pt-24 pb-16 md:pt-32 md:pb-24 bg-background min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <Link href="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm mb-6">
+          <Link href="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm mb-6">
             <ArrowLeft className="w-4 h-4" />
             {t('Back to Home', 'होम पर वापस')}
           </Link>
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 flex items-center gap-3">
-            <Star className="w-8 h-8 text-[#F97316]" />
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 flex items-center gap-3">
+            <Star className="w-8 h-8 text-accent" />
             {t('Important Questions', 'महत्वपूर्ण प्रश्न')}
           </h1>
-          <p className="text-gray-400 text-lg">
+          <p className="text-muted-foreground text-lg">
             {t('Browse important questions by Year, Semester, and Subject', 'वर्ष, सेमेस्टर और विषय के अनुसार महत्वपूर्ण प्रश्न ब्राउज़ करें')}
           </p>
         </div>
@@ -217,16 +217,16 @@ export function ImpQuestions() {
           <div className="flex items-center gap-2 mb-6 text-sm flex-wrap">
             <button
               onClick={() => { setSelectedYear(null); setSelectedSemester(null); setSelectedSubject(null); }}
-              className="text-gray-400 hover:text-white transition-colors"
+              className="text-muted-foreground hover:text-foreground transition-colors"
             >
               {t('All Years', 'सभी वर्ष')}
             </button>
             {selectedYear && (
               <>
-                <ChevronRight className="w-4 h-4 text-gray-600" />
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
                 <button
                   onClick={() => { setSelectedSemester(null); setSelectedSubject(null); }}
-                  className={selectedSemester ? 'text-gray-400 hover:text-white transition-colors' : 'text-[#F97316]'}
+                  className={selectedSemester ? 'text-muted-foreground hover:text-foreground transition-colors' : 'text-accent'}
                 >
                   {selectedYear.label}
                 </button>
@@ -234,10 +234,10 @@ export function ImpQuestions() {
             )}
             {selectedSemester && (
               <>
-                <ChevronRight className="w-4 h-4 text-gray-600" />
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
                 <button
                   onClick={() => setSelectedSubject(null)}
-                  className={selectedSubject ? 'text-gray-400 hover:text-white transition-colors' : 'text-[#F97316]'}
+                  className={selectedSubject ? 'text-muted-foreground hover:text-foreground transition-colors' : 'text-accent'}
                 >
                   {getSemesterLabel(selectedSemester.number)} {selectedSemester.branch_name !== 'Common' && `- ${selectedSemester.branch_name}`}
                 </button>
@@ -245,8 +245,8 @@ export function ImpQuestions() {
             )}
             {selectedSubject && (
               <>
-                <ChevronRight className="w-4 h-4 text-gray-600" />
-                <span className="text-[#F97316]">{selectedSubject.name}</span>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                <span className="text-accent">{selectedSubject.name}</span>
               </>
             )}
           </div>
@@ -258,15 +258,15 @@ export function ImpQuestions() {
             {years.map((year) => (
               <Card
                 key={year.id}
-                className="bg-gray-900 border-white/10 p-6 cursor-pointer hover:border-[#F97316]/50 hover:bg-gray-800 transition-all group"
+                className="bg-card border-border p-6 cursor-pointer hover:border-accent/50 hover:bg-secondary transition-all group"
                 onClick={() => setSelectedYear(year)}
               >
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-[#F97316] mb-2 group-hover:scale-110 transition-transform">
+                  <div className="text-4xl font-bold text-accent mb-2 group-hover:scale-110 transition-transform">
                     {year.number}
                   </div>
-                  <div className="text-white font-semibold">{year.label}</div>
-                  <div className="text-gray-500 text-sm mt-1">{t('Year', 'वर्ष')}</div>
+                  <div className="text-foreground font-semibold">{year.label}</div>
+                  <div className="text-muted-foreground text-sm mt-1">{t('Year', 'वर्ष')}</div>
                 </div>
               </Card>
             ))}
@@ -277,8 +277,8 @@ export function ImpQuestions() {
         {selectedYear && !selectedSemester && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-white">{t('Select Semester', 'सेमेस्टर चुनें')}</h2>
-              <Button variant="ghost" className="text-gray-400 hover:text-white" onClick={() => setSelectedYear(null)}>
+              <h2 className="text-xl font-bold text-foreground">{t('Select Semester', 'सेमेस्टर चुनें')}</h2>
+              <Button variant="ghost" className="text-muted-foreground hover:text-foreground" onClick={() => setSelectedYear(null)}>
                 <ArrowLeft className="w-4 h-4 mr-1" />
                 {t('Back', 'वापस')}
               </Button>
@@ -286,27 +286,27 @@ export function ImpQuestions() {
             {loadingSemesters ? (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-20 bg-gray-800" />
+                  <Skeleton key={i} className="h-20 bg-secondary" />
                 ))}
               </div>
             ) : semesters.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-400">{t('No semesters available', 'कोई सेमेस्टर उपलब्ध नहीं')}</p>
+                <p className="text-muted-foreground">{t('No semesters available', 'कोई सेमेस्टर उपलब्ध नहीं')}</p>
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {semesters.map((sem) => (
                   <Card
                     key={sem.id}
-                    className="bg-gray-900 border-white/10 p-6 cursor-pointer hover:border-[#F97316]/50 hover:bg-gray-800 transition-all"
+                    className="bg-card border-border p-6 cursor-pointer hover:border-accent/50 hover:bg-secondary transition-all"
                     onClick={() => setSelectedSemester(sem)}
                   >
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-white mb-1">
+                      <div className="text-2xl font-bold text-foreground mb-1">
                         {t('Sem', 'सेम')} {sem.number}
                       </div>
                       {sem.branch_name && sem.branch_name !== 'Common' && (
-                        <div className="text-xs text-gray-400">{sem.branch_name}</div>
+                        <div className="text-xs text-muted-foreground">{sem.branch_name}</div>
                       )}
                     </div>
                   </Card>
@@ -320,8 +320,8 @@ export function ImpQuestions() {
         {selectedSemester && !selectedSubject && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-white">{t('Select Subject', 'विषय चुनें')}</h2>
-              <Button variant="ghost" className="text-gray-400 hover:text-white" onClick={() => setSelectedSemester(null)}>
+              <h2 className="text-xl font-bold text-foreground">{t('Select Subject', 'विषय चुनें')}</h2>
+              <Button variant="ghost" className="text-muted-foreground hover:text-foreground" onClick={() => setSelectedSemester(null)}>
                 <ArrowLeft className="w-4 h-4 mr-1" />
                 {t('Back', 'वापस')}
               </Button>
@@ -329,29 +329,29 @@ export function ImpQuestions() {
             {loadingSubjects ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="h-16 bg-gray-800" />
+                  <Skeleton key={i} className="h-16 bg-secondary" />
                 ))}
               </div>
             ) : subjects.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-400">{t('No subjects available for this semester', 'इस सेमेस्टर के लिए कोई विषय उपलब्ध नहीं')}</p>
+                <p className="text-muted-foreground">{t('No subjects available for this semester', 'इस सेमेस्टर के लिए कोई विषय उपलब्ध नहीं')}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {subjects.map((subject) => (
                   <Card
                     key={subject.id}
-                    className="bg-gray-900 border-white/10 p-5 cursor-pointer hover:border-[#F97316]/50 hover:bg-gray-800 transition-all"
+                    className="bg-card border-border p-5 cursor-pointer hover:border-accent/50 hover:bg-secondary transition-all"
                     onClick={() => setSelectedSubject(subject)}
                   >
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="text-white font-semibold">{subject.name}</p>
+                        <p className="text-foreground font-semibold">{subject.name}</p>
                         {subject.code && (
-                          <p className="text-gray-500 text-sm">{subject.code}</p>
+                          <p className="text-muted-foreground text-sm">{subject.code}</p>
                         )}
                       </div>
-                      <ChevronRight className="w-5 h-5 text-gray-600" />
+                      <ChevronRight className="w-5 h-5 text-muted-foreground" />
                     </div>
                   </Card>
                 ))}
@@ -365,12 +365,12 @@ export function ImpQuestions() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-white">{selectedSubject.name}</h2>
+                <h2 className="text-xl font-bold text-foreground">{selectedSubject.name}</h2>
                 {selectedSubject.code && (
-                  <p className="text-gray-500 text-sm">{selectedSubject.code}</p>
+                  <p className="text-muted-foreground text-sm">{selectedSubject.code}</p>
                 )}
               </div>
-              <Button variant="ghost" className="text-gray-400 hover:text-white" onClick={() => setSelectedSubject(null)}>
+              <Button variant="ghost" className="text-muted-foreground hover:text-foreground" onClick={() => setSelectedSubject(null)}>
                 <ArrowLeft className="w-4 h-4 mr-1" />
                 {t('Back', 'वापस')}
               </Button>
@@ -379,57 +379,57 @@ export function ImpQuestions() {
             {loadingQuestions ? (
               <div className="space-y-4">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <Skeleton key={i} className="h-24 bg-gray-800" />
+                  <Skeleton key={i} className="h-24 bg-secondary" />
                 ))}
               </div>
             ) : questions.length === 0 ? (
               <div className="text-center py-12">
-                <Star className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-400 text-lg">{t('No important questions uploaded for this subject yet.', 'इस विषय के लिए अभी कोई महत्वपूर्ण प्रश्न अपलोड नहीं किया गया।')}</p>
+                <Star className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground text-lg">{t('No important questions uploaded for this subject yet.', 'इस विषय के लिए अभी कोई महत्वपूर्ण प्रश्न अपलोड नहीं किया गया।')}</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {questions.map((q) => (
                   <div key={q.id}>
-                    <Card className="bg-gray-900 border-white/10 p-5">
+                    <Card className="bg-card border-border p-5">
                       <div className="flex items-start justify-between gap-4 flex-wrap">
                         <div className="flex items-start gap-4">
-                          <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                          <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
                             {q.content_type === 'text' ? (
                               <Type className="w-5 h-5 text-green-400" />
                             ) : (
-                              <Star className="w-5 h-5 text-[#F97316]" />
+                              <Star className="w-5 h-5 text-accent" />
                             )}
                           </div>
                           <div>
                             <div className="flex items-center gap-2 flex-wrap">
                               {q.unit_number && (
-                                <span className="px-2 py-0.5 rounded text-xs font-bold bg-[#F97316]/10 text-[#F97316]">{t('Unit', 'यूनिट')} {q.unit_number}</span>
+                                <span className="px-2 py-0.5 rounded text-xs font-bold bg-accent/10 text-accent">{t('Unit', 'यूनिट')} {q.unit_number}</span>
                               )}
-                              <span className="text-white font-semibold">{q.file_name}</span>
+                              <span className="text-foreground font-semibold">{q.file_name}</span>
                               {q.content_type === 'text' && (
                                 <span className="px-2 py-0.5 rounded text-xs bg-green-500/10 text-green-400">{t('Text', 'टेक्स्ट')}</span>
                               )}
                             </div>
-                            <p className="text-gray-500 text-sm mt-1">{t('Important Questions', 'महत्वपूर्ण प्रश्न')}</p>
+                            <p className="text-muted-foreground text-sm mt-1">{t('Important Questions', 'महत्वपूर्ण प्रश्न')}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                           {q.content_type === 'file' && q.file_url && (
                             <>
                               {(q.file_type === 'pdf' || q.file_type === 'image') && (
-                                <Button size="sm" variant="ghost" className="text-gray-300 hover:text-white" onClick={() => window.open(q.file_url!, '_blank')}>
+                                <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-foreground" onClick={() => window.open(q.file_url!, '_blank')}>
                                   <Eye className="w-4 h-4 mr-1" />
                                   {t('View', 'देखें')}
                                 </Button>
                               )}
                               {(q.file_type === 'docx' || q.file_type === 'pptx' || q.file_type === 'doc' || q.file_type === 'ppt') && (
-                                <Button size="sm" variant="ghost" className="text-gray-300 hover:text-white" onClick={() => window.open(`https://docs.google.com/viewer?url=${encodeURIComponent(q.file_url!)}`, '_blank')}>
+                                <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-foreground" onClick={() => window.open(`https://docs.google.com/viewer?url=${encodeURIComponent(q.file_url!)}`, '_blank')}>
                                   <Eye className="w-4 h-4 mr-1" />
                                   {t('View', 'देखें')}
                                 </Button>
                               )}
-                              <Button size="sm" className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white" asChild>
+                              <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground" asChild>
                                 <a href={q.file_url!} download>
                                   <Download className="w-4 h-4 mr-1" />
                                   {t('Download', 'डाउनलोड')}
@@ -438,7 +438,7 @@ export function ImpQuestions() {
                             </>
                           )}
                           {q.content_type === 'text' && (
-                            <Button size="sm" variant="ghost" className="text-gray-300 hover:text-white" onClick={() => toggleText(q.id)}>
+                            <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-foreground" onClick={() => toggleText(q.id)}>
                               <Eye className="w-4 h-4 mr-1" />
                               {expandedText.has(q.id) ? t('Hide', 'छुपाएं') : t('Read', 'पढ़ें')}
                             </Button>
@@ -448,8 +448,8 @@ export function ImpQuestions() {
                     </Card>
 
                     {q.content_type === 'text' && expandedText.has(q.id) && q.text_content && (
-                      <Card className="bg-gray-800 border-white/5 p-6 mt-2">
-                        <div className="prose prose-invert max-w-none">
+                      <Card className="bg-secondary border-border p-6 mt-2">
+                        <div className="prose  max-w-none">
                           {renderTextContent(q.text_content)}
                         </div>
                       </Card>

@@ -556,8 +556,8 @@ export function AdminPanel() {
     return (
       <section className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4">
-          <Skeleton className="h-10 w-48 bg-gray-800 mb-4" />
-          <Skeleton className="h-64 bg-gray-800" />
+          <Skeleton className="h-10 w-48 bg-secondary mb-4" />
+          <Skeleton className="h-64 bg-secondary" />
         </div>
       </section>
     );
@@ -567,10 +567,10 @@ export function AdminPanel() {
     return (
       <section className="pt-24 pb-16 min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Lock className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">{t('Admin Login Required', 'एडमिन लॉगिन आवश्यक')}</h2>
-          <p className="text-gray-400 mb-6">{t('Sign in with Google to access the admin panel.', 'एडमिन पैनल तक पहुँचने के लिए Google से साइन इन करें।')}</p>
-          <Button onClick={handleLogin} className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white">
+          <Lock className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-foreground mb-2">{t('Admin Login Required', 'एडमिन लॉगिन आवश्यक')}</h2>
+          <p className="text-muted-foreground mb-6">{t('Sign in with Google to access the admin panel.', 'एडमिन पैनल तक पहुँचने के लिए Google से साइन इन करें।')}</p>
+          <Button onClick={handleLogin} className="bg-primary hover:bg-primary/90 text-primary-foreground">
             <LogIn className="w-4 h-4 mr-2" />
             {t('Sign in with Google', 'Google से साइन इन करें')}
           </Button>
@@ -584,10 +584,10 @@ export function AdminPanel() {
       <section className="pt-24 pb-16 min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Shield className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">{t('Access Denied', 'पहुँच अस्वीकृत')}</h2>
-          <p className="text-gray-400">{t('Your email is not in the admin whitelist.', 'आपका ईमेल एडमिन व्हाइटलिस्ट में नहीं है।')}</p>
-          <p className="text-gray-500 text-sm mt-2">{user.email}</p>
-          <Button onClick={handleLogout} variant="outline" className="mt-6 border-white/10 text-gray-300 hover:bg-white/5">
+          <h2 className="text-2xl font-bold text-foreground mb-2">{t('Access Denied', 'पहुँच अस्वीकृत')}</h2>
+          <p className="text-muted-foreground">{t('Your email is not in the admin whitelist.', 'आपका ईमेल एडमिन व्हाइटलिस्ट में नहीं है।')}</p>
+          <p className="text-muted-foreground text-sm mt-2">{user.email}</p>
+          <Button onClick={handleLogout} variant="outline" className="mt-6 border-border text-muted-foreground hover:bg-secondary">
             {t('Sign Out', 'साइन आउट')}
           </Button>
         </div>
@@ -600,28 +600,28 @@ export function AdminPanel() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <Shield className="w-8 h-8 text-[#F97316]" />
+            <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+              <Shield className="w-8 h-8 text-accent" />
               {t('Admin Panel', 'एडमिन पैनल')}
             </h1>
-            <p className="text-gray-400 text-sm mt-1">{user.email}</p>
+            <p className="text-muted-foreground text-sm mt-1">{user.email}</p>
           </div>
-          <Button onClick={handleLogout} variant="outline" className="border-white/10 text-gray-300 hover:bg-white/5">
+          <Button onClick={handleLogout} variant="outline" className="border-border text-muted-foreground hover:bg-secondary">
             {t('Sign Out', 'साइन आउट')}
           </Button>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-gray-900 border border-white/10 mb-6">
-            <TabsTrigger value="content" className="text-gray-300 data-[state=active]:text-white data-[state=active]:bg-[#1E3A8A]">
+          <TabsList className="bg-card border border-border mb-6">
+            <TabsTrigger value="content" className="text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-primary">
               <FolderOpen className="w-4 h-4 mr-1" />
               {t('Content', 'कंटेंट')}
             </TabsTrigger>
-            <TabsTrigger value="feedback" className="text-gray-300 data-[state=active]:text-white data-[state=active]:bg-[#1E3A8A]">
+            <TabsTrigger value="feedback" className="text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-primary">
               <FileText className="w-4 h-4 mr-1" />
               {t('Feedback', 'फीडबैक')}
             </TabsTrigger>
-            <TabsTrigger value="admins" className="text-gray-300 data-[state=active]:text-white data-[state=active]:bg-[#1E3A8A]">
+            <TabsTrigger value="admins" className="text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-primary">
               <Users className="w-4 h-4 mr-1" />
               {t('Admins', 'एडमिन')}
             </TabsTrigger>
@@ -630,22 +630,22 @@ export function AdminPanel() {
           <TabsContent value="content">
             <div className="grid lg:grid-cols-3 gap-6">
               {/* Upload Form */}
-              <Card className="bg-gray-900 border-white/10 p-6">
-                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                  {contentType === 'file' ? <Upload className="w-5 h-5 text-[#F97316]" /> : <Type className="w-5 h-5 text-[#F97316]" />}
+              <Card className="bg-card border-border p-6">
+                <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                  {contentType === 'file' ? <Upload className="w-5 h-5 text-accent" /> : <Type className="w-5 h-5 text-accent" />}
                   {contentType === 'file' ? t('Upload File', 'फाइल अपलोड करें') : t('Add Text Content', 'टेक्स्ट कंटेंट जोड़ें')}
                 </h3>
 
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-gray-300 text-sm">{t('Section', 'सेक्शन')}</Label>
+                    <Label className="text-muted-foreground text-sm">{t('Section', 'सेक्शन')}</Label>
                     <Select value={contentSection} onValueChange={setContentSection}>
-                      <SelectTrigger className="bg-white/5 border-white/10 text-white mt-1">
+                      <SelectTrigger className="bg-secondary border-border text-foreground mt-1">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-gray-900 border-white/10">
+                      <SelectContent className="bg-card border-border">
                         {Object.entries(SECTION_LABELS).map(([key, label]) => (
-                          <SelectItem key={key} value={key} className="text-white hover:bg-white/10">
+                          <SelectItem key={key} value={key} className="text-foreground hover:bg-secondary">
                             <div className="flex items-center gap-2">
                               {label.icon}
                               {t(label.en, label.hi)}
@@ -657,12 +657,12 @@ export function AdminPanel() {
                   </div>
 
                   <div>
-                    <Label className="text-gray-300 text-sm">{t('Content Type', 'कंटेंट प्रकार')}</Label>
+                    <Label className="text-muted-foreground text-sm">{t('Content Type', 'कंटेंट प्रकार')}</Label>
                     <div className="flex gap-2 mt-2">
                       <Button
                         variant={contentType === 'file' ? 'default' : 'outline'}
                         size="sm"
-                        className={contentType === 'file' ? 'bg-[#F97316] text-white' : 'border-white/10 text-gray-300'}
+                        className={contentType === 'file' ? 'bg-accent text-accent-foreground' : 'border-border text-muted-foreground'}
                         onClick={() => setContentType('file')}
                       >
                         <Upload className="w-4 h-4 mr-1" />
@@ -671,7 +671,7 @@ export function AdminPanel() {
                       <Button
                         variant={contentType === 'text' ? 'default' : 'outline'}
                         size="sm"
-                        className={contentType === 'text' ? 'bg-[#F97316] text-white' : 'border-white/10 text-gray-300'}
+                        className={contentType === 'text' ? 'bg-accent text-accent-foreground' : 'border-border text-muted-foreground'}
                         onClick={() => setContentType('text')}
                       >
                         <Type className="w-4 h-4 mr-1" />
@@ -682,14 +682,14 @@ export function AdminPanel() {
 
                   {(contentSection === 'notes' || contentSection === 'pyq' || contentSection === 'imp_questions' || contentSection === 'syllabus') && subjects.length > 0 && (
                     <div>
-                      <Label className="text-gray-300 text-sm">{t('Subject (Select from list)', 'विषय (सूची से चुनें)')}</Label>
+                      <Label className="text-muted-foreground text-sm">{t('Subject (Select from list)', 'विषय (सूची से चुनें)')}</Label>
                       <Select value={selectedSubjectId} onValueChange={setSelectedSubjectId}>
-                        <SelectTrigger className="bg-white/5 border-white/10 text-white mt-1">
+                        <SelectTrigger className="bg-secondary border-border text-foreground mt-1">
                           <SelectValue placeholder={t('Select a subject...', 'विषय चुनें...')} />
                         </SelectTrigger>
-                        <SelectContent className="bg-gray-900 border-white/10 max-h-60">
+                        <SelectContent className="bg-card border-border max-h-60">
                           {subjects.map((sub) => (
-                            <SelectItem key={sub.id} value={sub.id} className="text-white hover:bg-white/10">
+                            <SelectItem key={sub.id} value={sub.id} className="text-foreground hover:bg-secondary">
                               {sub.name} {sub.code && `(${sub.code})`}
                             </SelectItem>
                           ))}
@@ -701,23 +701,23 @@ export function AdminPanel() {
                   {contentSection === 'notes' && (
                     <>
                       <div>
-                        <Label className="text-gray-300 text-sm">{t('Subject Name (or type manually)', 'विषय का नाम (या मैन्युअल टाइप करें)')}</Label>
+                        <Label className="text-muted-foreground text-sm">{t('Subject Name (or type manually)', 'विषय का नाम (या मैन्युअल टाइप करें)')}</Label>
                         <Input
                           value={subjectName}
                           onChange={(e) => setSubjectName(e.target.value)}
                           placeholder={t('e.g., Data Structures', 'जैसे: डेटा स्ट्रक्चर')}
-                          className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
+                          className="bg-secondary border-border text-foreground placeholder:text-muted-foreground mt-1"
                           disabled={!!selectedSubjectId}
                         />
                       </div>
                       <div>
-                        <Label className="text-gray-300 text-sm">{t('Unit Number', 'यूनिट नंबर')}</Label>
+                        <Label className="text-muted-foreground text-sm">{t('Unit Number', 'यूनिट नंबर')}</Label>
                         <Input
                           type="number"
                           value={unitNumber}
                           onChange={(e) => setUnitNumber(e.target.value)}
                           placeholder="1, 2, 3..."
-                          className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
+                          className="bg-secondary border-border text-foreground placeholder:text-muted-foreground mt-1"
                         />
                       </div>
                     </>
@@ -726,23 +726,23 @@ export function AdminPanel() {
                   {contentSection === 'imp_questions' && (
                     <>
                       <div>
-                        <Label className="text-gray-300 text-sm">{t('Subject Name (or type manually)', 'विषय का नाम (या मैन्युअल टाइप करें)')}</Label>
+                        <Label className="text-muted-foreground text-sm">{t('Subject Name (or type manually)', 'विषय का नाम (या मैन्युअल टाइप करें)')}</Label>
                         <Input
                           value={subjectName}
                           onChange={(e) => setSubjectName(e.target.value)}
                           placeholder={t('e.g., Data Structures', 'जैसे: डेटा स्ट्रक्चर')}
-                          className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
+                          className="bg-secondary border-border text-foreground placeholder:text-muted-foreground mt-1"
                           disabled={!!selectedSubjectId}
                         />
                       </div>
                       <div>
-                        <Label className="text-gray-300 text-sm">{t('Unit Number', 'यूनिट नंबर')}</Label>
+                        <Label className="text-muted-foreground text-sm">{t('Unit Number', 'यूनिट नंबर')}</Label>
                         <Input
                           type="number"
                           value={unitNumber}
                           onChange={(e) => setUnitNumber(e.target.value)}
                           placeholder="1, 2, 3..."
-                          className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
+                          className="bg-secondary border-border text-foreground placeholder:text-muted-foreground mt-1"
                         />
                       </div>
                     </>
@@ -750,12 +750,12 @@ export function AdminPanel() {
 
                   {contentSection === 'syllabus' && (
                     <div>
-                      <Label className="text-gray-300 text-sm">{t('Subject Name (or type manually)', 'विषय का नाम (या मैन्युअल टाइप करें)')}</Label>
+                      <Label className="text-muted-foreground text-sm">{t('Subject Name (or type manually)', 'विषय का नाम (या मैन्युअल टाइप करें)')}</Label>
                       <Input
                         value={subjectName}
                         onChange={(e) => setSubjectName(e.target.value)}
                         placeholder={t('e.g., Data Structures', 'जैसे: डेटा स्ट्रक्चर')}
-                        className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
+                        className="bg-secondary border-border text-foreground placeholder:text-muted-foreground mt-1"
                         disabled={!!selectedSubjectId}
                       />
                     </div>
@@ -764,27 +764,27 @@ export function AdminPanel() {
                   {contentSection === 'pyq' && (
                     <>
                       <div>
-                        <Label className="text-gray-300 text-sm">{t('Subject Name (or type manually)', 'विषय का नाम (या मैन्युअल टाइप करें)')}</Label>
+                        <Label className="text-muted-foreground text-sm">{t('Subject Name (or type manually)', 'विषय का नाम (या मैन्युअल टाइप करें)')}</Label>
                         <Input
                           value={subjectName}
                           onChange={(e) => setSubjectName(e.target.value)}
                           placeholder={t('e.g., Operating Systems', 'जैसे: ऑपरेटिंग सिस्टम')}
-                          className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
+                          className="bg-secondary border-border text-foreground placeholder:text-muted-foreground mt-1"
                           disabled={!!selectedSubjectId}
                         />
                       </div>
                       <div>
-                        <Label className="text-gray-300 text-sm">{t('Year', 'वर्ष')}</Label>
+                        <Label className="text-muted-foreground text-sm">{t('Year', 'वर्ष')}</Label>
                         <Input
                           value={pyqYear}
                           onChange={(e) => setPyqYear(e.target.value)}
                           placeholder="2023, 2024..."
-                          className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
+                          className="bg-secondary border-border text-foreground placeholder:text-muted-foreground mt-1"
                         />
                       </div>
                       {contentType === 'file' && (
                         <div>
-                          <Label className="text-gray-300 text-sm">{t('Answer PDF (Optional)', 'उत्तर PDF (वैकल्पिक)')}</Label>
+                          <Label className="text-muted-foreground text-sm">{t('Answer PDF (Optional)', 'उत्तर PDF (वैकल्पिक)')}</Label>
                           {answerPdfUrl ? (
                             <div className="flex items-center gap-2 mt-1 bg-green-500/10 border border-green-500/30 rounded px-3 py-2">
                               <File className="w-4 h-4 text-green-400" />
@@ -796,7 +796,7 @@ export function AdminPanel() {
                           ) : (
                             <Button
                               variant="outline"
-                              className="w-full border-white/10 text-gray-300 hover:bg-white/5 mt-1"
+                              className="w-full border-border text-muted-foreground hover:bg-secondary mt-1"
                               onClick={() => answerFileRef.current?.click()}
                               disabled={uploadingAnswer}
                             >
@@ -819,22 +819,22 @@ export function AdminPanel() {
                   {contentSection === 'dsa' && (
                     <>
                       <div>
-                        <Label className="text-gray-300 text-sm">{t('Topic Name', 'विषय का नाम')}</Label>
+                        <Label className="text-muted-foreground text-sm">{t('Topic Name', 'विषय का नाम')}</Label>
                         <Input
                           value={subjectName}
                           onChange={(e) => setSubjectName(e.target.value)}
                           placeholder={t('e.g., Arrays, Trees', 'जैसे: ऐरे, ट्री')}
-                          className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
+                          className="bg-secondary border-border text-foreground placeholder:text-muted-foreground mt-1"
                         />
                       </div>
                       {contentType === 'file' && (
                         <div>
-                          <Label className="text-gray-300 text-sm">{t('File Type', 'फाइल प्रकार')}</Label>
+                          <Label className="text-muted-foreground text-sm">{t('File Type', 'फाइल प्रकार')}</Label>
                           <div className="flex gap-2 mt-2">
                             <Button
                               variant={isNotesPdf ? 'default' : 'outline'}
                               size="sm"
-                              className={isNotesPdf ? 'bg-[#F97316] text-white' : 'border-white/10 text-gray-300'}
+                              className={isNotesPdf ? 'bg-accent text-accent-foreground' : 'border-border text-muted-foreground'}
                               onClick={() => { setIsNotesPdf(true); setIsQuestionsPdf(false); }}
                             >
                               {t('Notes', 'नोट्स')}
@@ -842,7 +842,7 @@ export function AdminPanel() {
                             <Button
                               variant={isQuestionsPdf ? 'default' : 'outline'}
                               size="sm"
-                              className={isQuestionsPdf ? 'bg-[#F97316] text-white' : 'border-white/10 text-gray-300'}
+                              className={isQuestionsPdf ? 'bg-accent text-accent-foreground' : 'border-border text-muted-foreground'}
                               onClick={() => { setIsNotesPdf(false); setIsQuestionsPdf(true); }}
                             >
                               {t('Questions', 'प्रश्न')}
@@ -856,41 +856,41 @@ export function AdminPanel() {
                   {contentSection === 'placement' && (
                     <>
                       <div>
-                        <Label className="text-gray-300 text-sm">{t('Company', 'कंपनी')}</Label>
+                        <Label className="text-muted-foreground text-sm">{t('Company', 'कंपनी')}</Label>
                         <Input
                           value={company}
                           onChange={(e) => setCompany(e.target.value)}
                           placeholder={t('e.g., Google, Amazon', 'जैसे: Google, Amazon')}
-                          className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
+                          className="bg-secondary border-border text-foreground placeholder:text-muted-foreground mt-1"
                         />
                       </div>
                       <div>
-                        <Label className="text-gray-300 text-sm">{t('Category', 'श्रेणी')}</Label>
+                        <Label className="text-muted-foreground text-sm">{t('Category', 'श्रेणी')}</Label>
                         <Input
                           value={category}
                           onChange={(e) => setCategory(e.target.value)}
                           placeholder={t('e.g., Aptitude, Technical', 'जैसे: एप्टीट्यूड, टेक्निकल')}
-                          className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
+                          className="bg-secondary border-border text-foreground placeholder:text-muted-foreground mt-1"
                         />
                       </div>
                       <div>
-                        <Label className="text-gray-300 text-sm">{t('Title', 'शीर्षक')}</Label>
+                        <Label className="text-muted-foreground text-sm">{t('Title', 'शीर्षक')}</Label>
                         <Input
                           value={subjectName}
                           onChange={(e) => setSubjectName(e.target.value)}
                           placeholder={t('e.g., Coding Patterns', 'जैसे: कोडिंग पैटर्न')}
-                          className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
+                          className="bg-secondary border-border text-foreground placeholder:text-muted-foreground mt-1"
                         />
                       </div>
                     </>
                   )}
 
                   {contentType === 'file' && (
-                    <div className="pt-4 border-t border-white/10">
-                      <Label className="text-gray-300 text-sm">{t('Select Files', 'फाइलें चुनें')}</Label>
+                    <div className="pt-4 border-t border-border">
+                      <Label className="text-muted-foreground text-sm">{t('Select Files', 'फाइलें चुनें')}</Label>
                       <Button
                         variant="outline"
-                        className="w-full border-dashed border-white/20 text-gray-400 hover:text-white hover:border-white/40 mt-2 h-20"
+                        className="w-full border-dashed border-border text-muted-foreground hover:text-foreground hover:border-border mt-2 h-20"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploading}
                       >
@@ -903,7 +903,7 @@ export function AdminPanel() {
                           <div className="text-center">
                             <Upload className="w-6 h-6 mx-auto mb-1" />
                             <span className="text-sm">{t('Click to upload PDF, Image, or Documents', 'PDF, इमेज, या डॉक्यूमेंट अपलोड करें')}</span>
-                            <span className="text-xs text-gray-500 block mt-1">{t('(Multiple files allowed)', '(एक से अधिक फाइलें)')}</span>
+                            <span className="text-xs text-muted-foreground block mt-1">{t('(Multiple files allowed)', '(एक से अधिक फाइलें)')}</span>
                           </div>
                         )}
                       </Button>
@@ -920,14 +920,14 @@ export function AdminPanel() {
                       {uploadingFiles.length > 0 && (
                         <div className="mt-4 space-y-2">
                           {uploadingFiles.map((f, idx) => (
-                            <div key={idx} className="bg-gray-800 rounded-lg p-3">
+                            <div key={idx} className="bg-secondary rounded-lg p-3">
                               <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm text-white truncate max-w-[200px]">{f.name}</span>
+                                <span className="text-sm text-foreground truncate max-w-[200px]">{f.name}</span>
                                 <span className={`text-xs px-2 py-0.5 rounded ${
                                   f.status === 'success' ? 'bg-green-500/10 text-green-400' :
                                   f.status === 'error' ? 'bg-red-500/10 text-red-400' :
                                   f.status === 'uploading' ? 'bg-blue-500/10 text-blue-400' :
-                                  'bg-gray-500/10 text-gray-400'
+                                  'bg-muted text-muted-foreground'
                                 }`}>
                                   {f.status === 'success' ? t('Done', 'पूर्ण') :
                                    f.status === 'error' ? t('Failed', 'विफल') :
@@ -935,12 +935,12 @@ export function AdminPanel() {
                                    t('Pending', 'प्रतीक्षा')}
                                 </span>
                               </div>
-                              <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                              <div className="h-1.5 bg-code-bg rounded-full overflow-hidden">
                                 <div
                                   className={`h-full transition-all ${
                                     f.status === 'success' ? 'bg-green-500' :
                                     f.status === 'error' ? 'bg-red-500' :
-                                    'bg-[#F97316]'
+                                    'bg-accent'
                                   }`}
                                   style={{ width: `${f.progress}%` }}
                                 />
@@ -956,28 +956,28 @@ export function AdminPanel() {
                   )}
 
                   {contentType === 'text' && (
-                    <div className="pt-4 border-t border-white/10 space-y-4">
+                    <div className="pt-4 border-t border-border space-y-4">
                       <div>
-                        <Label className="text-gray-300 text-sm">{t('Title (Optional)', 'शीर्षक (वैकल्पिक)')}</Label>
+                        <Label className="text-muted-foreground text-sm">{t('Title (Optional)', 'शीर्षक (वैकल्पिक)')}</Label>
                         <Input
                           value={textTitle}
                           onChange={(e) => setTextTitle(e.target.value)}
                           placeholder={t('e.g., Quick Notes, Summary', 'जैसे: क्विक नोट्स, सारांश')}
-                          className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
+                          className="bg-secondary border-border text-foreground placeholder:text-muted-foreground mt-1"
                         />
                       </div>
                       <div>
-                        <Label className="text-gray-300 text-sm">{t('Content', 'कंटेंट')}</Label>
+                        <Label className="text-muted-foreground text-sm">{t('Content', 'कंटेंट')}</Label>
                         <Textarea
                           value={textContent}
                           onChange={(e) => setTextContent(e.target.value)}
                           placeholder={t('Write your notes, explanations, or any text content here...', 'यहां अपने नोट्स, व्याख्या, या कोई भी टेक्स्ट कंटेंट लिखें...')}
-                          className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1 min-h-[200px] resize-y"
+                          className="bg-secondary border-border text-foreground placeholder:text-muted-foreground mt-1 min-h-[200px] resize-y"
                         />
-                        <p className="text-gray-500 text-xs mt-1">{t('Tip: You can use basic formatting like headings (#), bold (**text**), lists (- item), and code (`code`)', 'सुझाव: आप हेडिंग (#), बोल्ड (**टेक्स्ट**), सूचियां (- आइटम), और कोड (`कोड`) जैसे बेसिक फॉर्मेटिंग का उपयोग कर सकते हैं')}</p>
+                        <p className="text-muted-foreground text-xs mt-1">{t('Tip: You can use basic formatting like headings (#), bold (**text**), lists (- item), and code (`code`)', 'सुझाव: आप हेडिंग (#), बोल्ड (**टेक्स्ट**), सूचियां (- आइटम), और कोड (`कोड`) जैसे बेसिक फॉर्मेटिंग का उपयोग कर सकते हैं')}</p>
                       </div>
                       <Button
-                        className="w-full bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white"
+                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                         onClick={handleTextSave}
                         disabled={saving || !textContent.trim()}
                       >
@@ -991,24 +991,24 @@ export function AdminPanel() {
 
               {/* Files List */}
               <div className="lg:col-span-2">
-                <Card className="bg-gray-900 border-white/10 p-6">
-                  <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <Card className="bg-card border-border p-6">
+                  <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                     {SECTION_LABELS[contentSection]?.icon}
                     {t('Uploaded Content', 'अपलोड किया गया कंटेंट')}
                   </h3>
 
                   {contentFiles.length === 0 ? (
                     <div className="text-center py-12">
-                      <File className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                      <p className="text-gray-500">{t('No content uploaded yet.', 'अभी कोई कंटेंट नहीं अपलोड किया गया।')}</p>
+                      <File className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-muted-foreground">{t('No content uploaded yet.', 'अभी कोई कंटेंट नहीं अपलोड किया गया।')}</p>
                     </div>
                   ) : (
                     <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
                       {contentFiles.map((file) => (
-                        <Card key={file.id} className="bg-gray-800 border-white/5 p-4">
+                        <Card key={file.id} className="bg-secondary border-border p-4">
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex items-start gap-3 min-w-0 flex-1">
-                              <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 mt-1">
+                              <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0 mt-1">
                                 {file.content_type === 'text' ? (
                                   <Type className="w-5 h-5 text-green-400" />
                                 ) : (
@@ -1016,7 +1016,7 @@ export function AdminPanel() {
                                 )}
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="text-white font-medium truncate">{file.file_name}</p>
+                                <p className="text-foreground font-medium truncate">{file.file_name}</p>
                                 <div className="flex flex-wrap gap-2 mt-1">
                                   {file.content_type === 'text' && (
                                     <span className="px-2 py-0.5 rounded text-xs bg-green-500/10 text-green-400">{t('Text', 'टेक्स्ट')}</span>
@@ -1025,13 +1025,13 @@ export function AdminPanel() {
                                     <span className="px-2 py-0.5 rounded text-xs bg-blue-500/10 text-blue-400">{file.subject_name}</span>
                                   )}
                                   {file.unit_number && (
-                                    <span className="px-2 py-0.5 rounded text-xs bg-white/5 text-gray-400">Unit {file.unit_number}</span>
+                                    <span className="px-2 py-0.5 rounded text-xs bg-secondary text-muted-foreground">Unit {file.unit_number}</span>
                                   )}
                                   {file.pyq_year && (
-                                    <span className="px-2 py-0.5 rounded text-xs bg-[#F97316]/10 text-[#F97316]">{file.pyq_year}</span>
+                                    <span className="px-2 py-0.5 rounded text-xs bg-accent/10 text-accent">{file.pyq_year}</span>
                                   )}
                                   {file.company && (
-                                    <span className="px-2 py-0.5 rounded text-xs bg-[#F97316]/10 text-[#F97316]">{file.company}</span>
+                                    <span className="px-2 py-0.5 rounded text-xs bg-accent/10 text-accent">{file.company}</span>
                                   )}
                                   {file.category && (
                                     <span className="px-2 py-0.5 rounded text-xs bg-blue-500/10 text-blue-400">{file.category}</span>
@@ -1047,7 +1047,7 @@ export function AdminPanel() {
                                   )}
                                 </div>
                                 {file.content_type === 'text' && file.text_content && (
-                                  <p className="text-gray-400 text-sm mt-2 line-clamp-2">{file.text_content.substring(0, 150)}...</p>
+                                  <p className="text-muted-foreground text-sm mt-2 line-clamp-2">{file.text_content.substring(0, 150)}...</p>
                                 )}
                               </div>
                             </div>
@@ -1057,7 +1057,7 @@ export function AdminPanel() {
                                   <Button
                                     size="sm"
                                     variant="ghost"
-                                    className="text-gray-400 hover:text-white"
+                                    className="text-muted-foreground hover:text-foreground"
                                     onClick={() => window.open(file.file_url!, '_blank')}
                                     title={t('View', 'देखें')}
                                   >
@@ -1066,7 +1066,7 @@ export function AdminPanel() {
                                   <Button
                                     size="sm"
                                     variant="ghost"
-                                    className="text-gray-400 hover:text-white"
+                                    className="text-muted-foreground hover:text-foreground"
                                     onClick={() => {
                                       const link = document.createElement('a');
                                       link.href = file.file_url!;
@@ -1112,17 +1112,17 @@ export function AdminPanel() {
           <TabsContent value="feedback">
             <div className="space-y-4">
               {feedbackList.length === 0 ? (
-                <p className="text-gray-500 text-center py-12">{t('No feedback yet.', 'अभी कोई फीडबैक नहीं।')}</p>
+                <p className="text-muted-foreground text-center py-12">{t('No feedback yet.', 'अभी कोई फीडबैक नहीं।')}</p>
               ) : (
                 feedbackList.map((fb) => (
-                  <Card key={fb.id} className="bg-gray-900 border-white/10 p-5">
+                  <Card key={fb.id} className="bg-card border-border p-5">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="text-white font-semibold">{fb.name}</p>
-                        <p className="text-gray-400 text-sm">{fb.email}</p>
-                        <p className="text-gray-300 mt-2">{fb.message}</p>
+                        <p className="text-foreground font-semibold">{fb.name}</p>
+                        <p className="text-muted-foreground text-sm">{fb.email}</p>
+                        <p className="text-muted-foreground mt-2">{fb.message}</p>
                       </div>
-                      <span className="text-gray-500 text-xs whitespace-nowrap">{new Date(fb.created_at).toLocaleDateString()}</span>
+                      <span className="text-muted-foreground text-xs whitespace-nowrap">{new Date(fb.created_at).toLocaleDateString()}</span>
                     </div>
                   </Card>
                 ))
@@ -1131,9 +1131,9 @@ export function AdminPanel() {
           </TabsContent>
 
           <TabsContent value="admins">
-            <Card className="bg-gray-900 border-white/10 p-6 mb-6">
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <KeyRound className="w-5 h-5 text-[#F97316]" />
+            <Card className="bg-card border-border p-6 mb-6">
+              <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                <KeyRound className="w-5 h-5 text-accent" />
                 {t('Add Admin', 'एडमिन जोड़ें')}
               </h3>
               <div className="flex gap-3">
@@ -1141,9 +1141,9 @@ export function AdminPanel() {
                   placeholder={t('Enter email address', 'ईमेल पता दर्ज करें')}
                   value={newAdminEmail}
                   onChange={(e) => setNewAdminEmail(e.target.value)}
-                  className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 flex-1"
+                  className="bg-secondary border-border text-foreground placeholder:text-muted-foreground flex-1"
                 />
-                <Button onClick={handleAddAdmin} className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white">
+                <Button onClick={handleAddAdmin} className="bg-primary hover:bg-primary/90 text-primary-foreground">
                   <Plus className="w-4 h-4 mr-1" />
                   {t('Add', 'जोड़ें')}
                 </Button>
@@ -1156,10 +1156,10 @@ export function AdminPanel() {
                 const isCurrentUser = admin.email === user?.email;
                 const canDelete = !isProtectedAdmin && !isCurrentUser;
                 return (
-                  <Card key={admin.id} className="bg-gray-900 border-white/10 p-4 flex items-center justify-between">
+                  <Card key={admin.id} className="bg-card border-border p-4 flex items-center justify-between">
                     <div>
-                      <p className="text-white font-medium">{admin.email}</p>
-                      <p className="text-gray-500 text-xs">{t('Added by', 'जोड़ा गया')}: {admin.added_by || 'system'} | {new Date(admin.created_at).toLocaleDateString()}</p>
+                      <p className="text-foreground font-medium">{admin.email}</p>
+                      <p className="text-muted-foreground text-xs">{t('Added by', 'जोड़ा गया')}: {admin.added_by || 'system'} | {new Date(admin.created_at).toLocaleDateString()}</p>
                     </div>
                     {canDelete && (
                       <Button
@@ -1180,31 +1180,31 @@ export function AdminPanel() {
 
         {/* Edit Dialog */}
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogContent className="bg-gray-900 border-white/10 text-white max-w-lg">
+          <DialogContent className="bg-card border-border text-foreground max-w-lg">
             <DialogHeader>
-              <DialogTitle className="text-white flex items-center gap-2">
-                <Pencil className="w-5 h-5 text-[#F97316]" />
+              <DialogTitle className="text-foreground flex items-center gap-2">
+                <Pencil className="w-5 h-5 text-accent" />
                 {t('Edit Content', 'कंटेंट एडिट करें')}
               </DialogTitle>
             </DialogHeader>
 
             {editingFile && (
               <div className="space-y-4 py-4">
-                <div className="bg-gray-800 rounded p-3">
-                  <p className="text-gray-400 text-sm">{t('File', 'फाइल')}: <span className="text-white">{editingFile.file_name}</span></p>
-                  <p className="text-gray-400 text-sm">{t('Type', 'प्रकार')}: <span className="text-white">{editingFile.content_type}</span></p>
+                <div className="bg-secondary rounded p-3">
+                  <p className="text-muted-foreground text-sm">{t('File', 'फाइल')}: <span className="text-foreground">{editingFile.file_name}</span></p>
+                  <p className="text-muted-foreground text-sm">{t('Type', 'प्रकार')}: <span className="text-foreground">{editingFile.content_type}</span></p>
                 </div>
 
                 {(editingFile.section === 'notes' || editingFile.section === 'pyq') && subjects.length > 0 && (
                   <div>
-                    <Label className="text-gray-300 text-sm">{t('Subject', 'विषय')}</Label>
+                    <Label className="text-muted-foreground text-sm">{t('Subject', 'विषय')}</Label>
                     <Select value={editSubjectId} onValueChange={setEditSubjectId}>
-                      <SelectTrigger className="bg-white/5 border-white/10 text-white mt-1">
+                      <SelectTrigger className="bg-secondary border-border text-foreground mt-1">
                         <SelectValue placeholder={t('Select a subject...', 'विषय चुनें...')} />
                       </SelectTrigger>
-                      <SelectContent className="bg-gray-900 border-white/10 max-h-60">
+                      <SelectContent className="bg-card border-border max-h-60">
                         {subjects.map((sub) => (
-                          <SelectItem key={sub.id} value={sub.id} className="text-white hover:bg-white/10">
+                          <SelectItem key={sub.id} value={sub.id} className="text-foreground hover:bg-secondary">
                             {sub.name} {sub.code && `(${sub.code})`}
                           </SelectItem>
                         ))}
@@ -1215,13 +1215,13 @@ export function AdminPanel() {
 
                 {editingFile.section === 'notes' && (
                   <div>
-                    <Label className="text-gray-300 text-sm">{t('Unit Number', 'यूनिट नंबर')}</Label>
+                    <Label className="text-muted-foreground text-sm">{t('Unit Number', 'यूनिट नंबर')}</Label>
                     <Input
                       type="number"
                       value={editUnitNumber}
                       onChange={(e) => setEditUnitNumber(e.target.value)}
                       placeholder="1, 2, 3..."
-                      className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
+                      className="bg-secondary border-border text-foreground placeholder:text-muted-foreground mt-1"
                     />
                   </div>
                 )}
@@ -1229,28 +1229,28 @@ export function AdminPanel() {
                 {editingFile.section === 'pyq' && (
                   <>
                     <div>
-                      <Label className="text-gray-300 text-sm">{t('Year', 'वर्ष')}</Label>
+                      <Label className="text-muted-foreground text-sm">{t('Year', 'वर्ष')}</Label>
                       <Input
                         value={editPyqYear}
                         onChange={(e) => setEditPyqYear(e.target.value)}
                         placeholder="2023, 2024..."
-                        className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 mt-1"
+                        className="bg-secondary border-border text-foreground placeholder:text-muted-foreground mt-1"
                       />
                     </div>
                     <div>
-                      <Label className="text-gray-300 text-sm">{t('Question Paper PDF', 'प्रश्न पत्र PDF')}</Label>
+                      <Label className="text-muted-foreground text-sm">{t('Question Paper PDF', 'प्रश्न पत्र PDF')}</Label>
                       {editFileUrl ? (
                         <div className="flex items-center gap-2 mt-1 bg-blue-500/10 border border-blue-500/30 rounded px-3 py-2">
                           <File className="w-4 h-4 text-blue-400" />
                           <span className="text-blue-400 text-sm flex-1 truncate">{t('File attached', 'फाइल अटैच की गई')}</span>
-                          <Button size="sm" variant="ghost" className="text-gray-400 hover:text-white h-6" onClick={() => window.open(editFileUrl, '_blank')}>
+                          <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-foreground h-6" onClick={() => window.open(editFileUrl, '_blank')}>
                             <Eye className="w-4 h-4" />
                           </Button>
                         </div>
                       ) : null}
                       <Button
                         variant="outline"
-                        className="w-full border-white/10 text-gray-300 hover:bg-white/5 mt-2"
+                        className="w-full border-border text-muted-foreground hover:bg-secondary mt-2"
                         onClick={() => editFileRef.current?.click()}
                         disabled={editUploadingFile}
                       >
@@ -1266,12 +1266,12 @@ export function AdminPanel() {
                       />
                     </div>
                     <div>
-                      <Label className="text-gray-300 text-sm">{t('Answer PDF', 'उत्तर PDF')}</Label>
+                      <Label className="text-muted-foreground text-sm">{t('Answer PDF', 'उत्तर PDF')}</Label>
                       {editAnswerPdfUrl ? (
                         <div className="flex items-center gap-2 mt-1 bg-green-500/10 border border-green-500/30 rounded px-3 py-2">
                           <File className="w-4 h-4 text-green-400" />
                           <span className="text-green-400 text-sm flex-1 truncate">{t('Answer uploaded', 'उत्तर अपलोड किया')}</span>
-                          <Button size="sm" variant="ghost" className="text-gray-400 hover:text-white h-6" onClick={() => window.open(editAnswerPdfUrl, '_blank')}>
+                          <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-foreground h-6" onClick={() => window.open(editAnswerPdfUrl, '_blank')}>
                             <Eye className="w-4 h-4" />
                           </Button>
                           <Button size="sm" variant="ghost" className="text-red-400 hover:text-red-300 h-6 w-6 p-0" onClick={() => setEditAnswerPdfUrl(null)}>
@@ -1281,7 +1281,7 @@ export function AdminPanel() {
                       ) : (
                         <Button
                           variant="outline"
-                          className="w-full border-white/10 text-gray-300 hover:bg-white/5 mt-1"
+                          className="w-full border-border text-muted-foreground hover:bg-secondary mt-1"
                           onClick={() => editAnswerRef.current?.click()}
                           disabled={editUploadingAnswer}
                         >
@@ -1303,11 +1303,11 @@ export function AdminPanel() {
             )}
 
             <DialogFooter>
-              <Button variant="outline" className="border-white/10 text-gray-300" onClick={closeEditDialog}>
+              <Button variant="outline" className="border-border text-muted-foreground" onClick={closeEditDialog}>
                 {t('Cancel', 'रद्द करें')}
               </Button>
               <Button
-                className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 onClick={handleSaveEdit}
                 disabled={editSaving}
               >

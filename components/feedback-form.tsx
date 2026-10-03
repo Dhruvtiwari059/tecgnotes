@@ -56,36 +56,36 @@ export function FeedbackForm() {
   };
 
   return (
-    <section className="pt-24 pb-16 md:pt-32 md:pb-24 bg-black">
+    <section className="pt-24 pb-16 md:pt-32 md:pb-24 bg-background">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm mb-6">
+          <Link href="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm mb-6">
             <ArrowLeft className="w-4 h-4" />
             {t('Back to Home', 'होम पर वापस')}
           </Link>
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 flex items-center gap-3">
-            <MessageSquare className="w-8 h-8 text-[#F97316]" />
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 flex items-center gap-3">
+            <MessageSquare className="w-8 h-8 text-accent" />
             {t('Feedback', 'फीडबैक')}
           </h1>
-          <p className="text-gray-400 text-lg">
+          <p className="text-muted-foreground text-lg">
             {t('We value your feedback. Let us know how we can improve.', 'हम आपकी फीडबैक का महत्व समझते हैं। हमें बताएं कि हम कैसे बेहतर कर सकते हैं।')}
           </p>
         </div>
 
-        <Card className="bg-gray-900 border-white/10 p-6">
+        <Card className="bg-card border-border p-6">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">{t('Name', 'नाम')} <span className="text-red-400">*</span></label>
+              <label className="block text-sm font-medium text-muted-foreground mb-1">{t('Name', 'नाम')} <span className="text-red-400">*</span></label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder={t('Your name', 'आपका नाम')}
-                className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
+                className="bg-secondary border-border text-foreground placeholder:text-muted-foreground"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 {t('Email (Optional)', 'ईमेल (वैकल्पिक)')}
               </label>
               <Input
@@ -93,22 +93,22 @@ export function FeedbackForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t('Your email address (optional)', 'आपका ईमेल पता (वैकल्पिक)')}
-                className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
+                className="bg-secondary border-border text-foreground placeholder:text-muted-foreground"
               />
-              <p className="text-gray-500 text-xs mt-1">{t('Provide email if you want us to follow up', 'यदि आप चाहते हैं कि हम आपसे संपर्क करें तो ईमेल दें')}</p>
+              <p className="text-muted-foreground text-xs mt-1">{t('Provide email if you want us to follow up', 'यदि आप चाहते हैं कि हम आपसे संपर्क करें तो ईमेल दें')}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">{t('Message', 'संदेश')} <span className="text-red-400">*</span></label>
+              <label className="block text-sm font-medium text-muted-foreground mb-1">{t('Message', 'संदेश')} <span className="text-red-400">*</span></label>
               <Textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder={t('Your feedback, suggestions, or issues...', 'आपकी फीडबैक, सुझाव, या समस्याएं...')}
                 rows={5}
-                className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 resize-none"
+                className="bg-secondary border-border text-foreground placeholder:text-muted-foreground resize-none"
                 required
               />
             </div>
-            <Button type="submit" disabled={loading} className="w-full bg-[#F97316] hover:bg-[#F97316]/90 text-white">
+            <Button type="submit" disabled={loading} className="w-full bg-accent hover:bg-accent/90 text-foreground">
               {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
               {t('Send Feedback', 'फीडबैक भेजें')}
             </Button>

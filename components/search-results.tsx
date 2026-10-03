@@ -57,62 +57,62 @@ export function SearchResults() {
   }, [query]);
 
   return (
-    <section className="pt-24 pb-16 md:pt-32 md:pb-24 bg-black">
+    <section className="pt-24 pb-16 md:pt-32 md:pb-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm mb-6">
+          <Link href="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm mb-6">
             <ArrowLeft className="w-4 h-4" />
             {t('Back to Home', 'होम पर वापस')}
           </Link>
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 flex items-center gap-3">
-            <Search className="w-8 h-8 text-[#F97316]" />
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 flex items-center gap-3">
+            <Search className="w-8 h-8 text-accent" />
             {t('Search Results', 'खोज परिणाम')}
           </h1>
-          <p className="text-gray-400 text-lg">
-            {t('Results for', 'परिणाम')}: <span className="text-white font-medium">"{query}"</span>
+          <p className="text-muted-foreground text-lg">
+            {t('Results for', 'परिणाम')}: <span className="text-foreground font-medium">"{query}"</span>
           </p>
         </div>
 
         {loading ? (
           <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-20 bg-gray-800" />
+              <Skeleton key={i} className="h-20 bg-secondary" />
             ))}
           </div>
         ) : results.length === 0 ? (
           <div className="text-center py-20">
-            <Search className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400 text-lg">{t('No results found.', 'कोई परिणाम नहीं मिला।')}</p>
+            <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground text-lg">{t('No results found.', 'कोई परिणाम नहीं मिला।')}</p>
           </div>
         ) : (
           <div className="space-y-4">
             {results.map((result) => (
-              <Card key={result.id} className="bg-gray-900 border-white/10 p-5 flex items-center gap-4 hover:border-white/20 transition-colors">
-                <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+              <Card key={result.id} className="bg-card border-border p-5 flex items-center gap-4 hover:border-border transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
                   {result.type === 'subject' ? (
-                    <BookOpen className="w-5 h-5 text-[#F97316]" />
+                    <BookOpen className="w-5 h-5 text-accent" />
                   ) : (
                     <FileText className="w-5 h-5 text-blue-400" />
                   )}
                 </div>
                 <div className="flex-1">
-                  <p className="text-white font-semibold text-lg">{result.name}</p>
+                  <p className="text-foreground font-semibold text-lg">{result.name}</p>
                   {result.subject_name && (
-                    <p className="text-gray-500 text-sm">{result.subject_name}</p>
+                    <p className="text-muted-foreground text-sm">{result.subject_name}</p>
                   )}
-                  <span className="inline-block mt-1 px-2 py-0.5 rounded text-xs bg-white/5 text-gray-400">
+                  <span className="inline-block mt-1 px-2 py-0.5 rounded text-xs bg-secondary text-muted-foreground">
                     {result.type === 'subject' ? t('Subject', 'विषय') : t('Note', 'नोट')}
                   </span>
                 </div>
                 {result.type === 'subject' && result.slug && (
                   <Link href={`/subject/${result.slug}`}>
-                    <Button size="sm" className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white">
+                    <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
                       {t('View', 'देखें')}
                     </Button>
                   </Link>
                 )}
                 {result.type === 'note' && result.pdf_url && (
-                  <Button size="sm" className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white" asChild>
+                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground" asChild>
                     <a href={result.pdf_url} download>
                       {t('Download', 'डाउनलोड')}
                     </a>

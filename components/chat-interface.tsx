@@ -44,7 +44,7 @@ function formatResponseText(text: string): React.ReactNode {
       const content = trimmed.replace(/^#{1,3}\s*/, '');
       const Tag = level === 1 ? 'h2' : level === 2 ? 'h3' : 'h4';
       const sizeClass = level === 1 ? 'text-lg font-bold mt-4 mb-2' : level === 2 ? 'text-base font-semibold mt-3 mb-1' : 'text-sm font-medium mt-2 mb-1';
-      return <Tag key={i} className={`${sizeClass} text-white`}>{content}</Tag>;
+      return <Tag key={i} className={`${sizeClass} text-foreground`}>{content}</Tag>;
     }
 
     if (/^[-*•]\s/.test(trimmed)) {
@@ -54,8 +54,8 @@ function formatResponseText(text: string): React.ReactNode {
         .replace(/\*([^*]+)\*/g, '<em>$1</em>');
       return (
         <div key={i} className="flex items-start gap-2 my-1">
-          <span className="text-[#F97316] mt-1">✦</span>
-          <span className="text-gray-200" dangerouslySetInnerHTML={{ __html: styledContent }} />
+          <span className="text-accent mt-1">✦</span>
+          <span className="text-foreground" dangerouslySetInnerHTML={{ __html: styledContent }} />
         </div>
       );
     }
@@ -67,8 +67,8 @@ function formatResponseText(text: string): React.ReactNode {
         .replace(/\*([^*]+)\*/g, '<em>$1</em>');
       return (
         <div key={i} className="flex items-start gap-2 my-1">
-          <span className="text-[#1E3A8A] font-medium min-w-[20px]">{line.match(/^\d+/)?.[0]}.</span>
-          <span className="text-gray-200" dangerouslySetInnerHTML={{ __html: styledContent }} />
+          <span className="text-primary font-medium min-w-[20px]">{line.match(/^\d+/)?.[0]}.</span>
+          <span className="text-foreground" dangerouslySetInnerHTML={{ __html: styledContent }} />
         </div>
       );
     }
@@ -82,11 +82,11 @@ function formatResponseText(text: string): React.ReactNode {
     }
 
     const styledLine = line
-      .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-white">$1</strong>')
-      .replace(/\*([^*]+)\*/g, '<em class="text-gray-300">$1</em>')
-      .replace(/`([^`]+)`/g, '<code class="bg-gray-700 px-1.5 py-0.5 rounded text-sm text-[#F97316]">$1</code>');
+      .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-foreground">$1</strong>')
+      .replace(/\*([^*]+)\*/g, '<em class="text-muted-foreground">$1</em>')
+      .replace(/`([^`]+)`/g, '<code class="bg-code-bg px-1.5 py-0.5 rounded text-sm text-accent">$1</code>');
 
-    return <p key={i} className="text-gray-200 my-0.5" dangerouslySetInnerHTML={{ __html: styledLine }} />;
+    return <p key={i} className="text-foreground my-0.5" dangerouslySetInnerHTML={{ __html: styledLine }} />;
   });
 }
 
@@ -321,17 +321,17 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
     <div className={`flex flex-col ${fullPage ? 'max-w-4xl mx-auto h-[calc(100vh-200px)]' : 'h-full'}`}>
       {/* Header - Clean for students */}
       <div className="flex items-center gap-3 mb-4 px-2">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1E3A8A] to-[#F97316] flex items-center justify-center">
-          <Bot className="w-5 h-5 text-white" />
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+          <Bot className="w-5 h-5 text-primary-foreground" />
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-bold text-white">TechNotes AI</h2>
-          <p className="text-xs text-gray-400">{t('Your AI study assistant', 'आपका AI अध्ययन सहायक')}</p>
+          <h2 className="text-lg font-bold text-foreground">TechNotes AI</h2>
+          <p className="text-xs text-muted-foreground">{t('Your AI study assistant', 'आपका AI अध्ययन सहायक')}</p>
         </div>
         {/* Admin-only key indicator */}
         {isAdmin && (
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            <KeyRound className="w-3 h-3 text-gray-400" />
+            <KeyRound className="w-3 h-3 text-muted-foreground" />
             <div className="flex gap-0.5">
               {keyStatuses.map((status) => (
                 <div
@@ -342,13 +342,13 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
                       ? 'bg-green-500 animate-pulse'
                       : status.onCooldown
                       ? 'bg-red-500'
-                      : 'bg-gray-600'
+                      : 'bg-muted'
                   )}
                   title={`Key ${status.index + 1}${status.onCooldown ? ` (cooldown ${status.remainingSeconds}s)` : ''}`}
                 />
               ))}
             </div>
-            <span className="text-[10px] text-gray-400 font-medium">
+            <span className="text-[10px] text-muted-foreground font-medium">
               {keyStatuses[currentKeyIndex]?.onCooldown ? '--' : `Key ${currentKeyIndex + 1}`}
             </span>
           </div>
@@ -358,7 +358,7 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
       {/* Admin-only key status bar */}
       {isAdmin && (
         <div className="flex items-center gap-1 mb-2 px-2 flex-wrap">
-          <span className="text-[10px] text-gray-500 font-medium">{t('API Keys:', 'API Keys:')}</span>
+          <span className="text-[10px] text-muted-foreground font-medium">{t('API Keys:', 'API Keys:')}</span>
           {keyStatuses.map((status) => (
             <div
               key={status.index}
@@ -368,7 +368,7 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
                   ? 'bg-green-500/20 text-green-400 border-green-500/40'
                   : status.onCooldown
                   ? 'bg-red-500/20 text-red-400 border-red-500/40'
-                  : 'bg-gray-800/50 text-gray-500 border-gray-700/40'
+                  : 'bg-secondary/50 text-muted-foreground border-gray-700/40'
               )}
             >
               <span>{status.index + 1}</span>
@@ -388,14 +388,14 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
         </div>
       )}
 
-      <ScrollArea ref={scrollRef} className="flex-1 rounded-xl border border-white/10 bg-gray-900/50 p-4">
+      <ScrollArea ref={scrollRef} className="flex-1 rounded-xl border border-border bg-card/50 p-4">
         <div className="space-y-4">
           {messages.map((msg, i) => (
             <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${msg.role === 'user' ? 'bg-[#1E3A8A]' : 'bg-[#F97316]'}`}>
-                {msg.role === 'user' ? <User className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4 text-white" />}
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${msg.role === 'user' ? 'bg-primary' : 'bg-accent'}`}>
+                {msg.role === 'user' ? <User className="w-4 h-4 text-primary-foreground" /> : <Bot className="w-4 h-4 text-accent-foreground" />}
               </div>
-              <div className={`max-w-[80%] rounded-xl px-4 py-3 text-sm leading-relaxed ${msg.role === 'user' ? 'bg-[#1E3A8A] text-white' : 'bg-gray-800 text-gray-200'}`}>
+              <div className={`max-w-[80%] rounded-xl px-4 py-3 text-sm leading-relaxed ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground'}`}>
                 {msg.attachments && msg.attachments.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-2">
                     {msg.attachments.map((att) => (
@@ -403,8 +403,8 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
                         {att.type.startsWith('image/') ? (
                           <img src={`data:${att.type};base64,${att.data}`} alt={att.name} className="max-w-[150px] rounded-lg" />
                         ) : (
-                          <div className="flex items-center gap-2 px-2 py-1 bg-white/10 rounded-lg">
-                            <FileText className="w-4 h-4 text-[#F97316]" />
+                          <div className="flex items-center gap-2 px-2 py-1 bg-secondary rounded-lg">
+                            <FileText className="w-4 h-4 text-accent" />
                             <span className="text-xs truncate max-w-[100px]">{att.name}</span>
                           </div>
                         )}
@@ -412,7 +412,7 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
                     ))}
                   </div>
                 )}
-                <div className="prose prose-invert prose-sm max-w-none">
+                <div className="prose  prose-sm max-w-none">
                   {msg.role === 'assistant' ? formatResponseText(msg.text) : <div className="whitespace-pre-wrap">{msg.text}</div>}
                 </div>
               </div>
@@ -420,13 +420,13 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
           ))}
           {loading && (
             <div className="flex gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#F97316] flex items-center justify-center flex-shrink-0">
-                <Bot className="w-4 h-4 text-white" />
+              <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
+                <Bot className="w-4 h-4 text-accent-foreground" />
               </div>
-              <div className="bg-gray-800 rounded-xl px-4 py-3">
+              <div className="bg-secondary rounded-xl px-4 py-3">
                 <div className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 text-[#F97316] animate-spin" />
-                  <span className="text-xs text-gray-400">{t('Thinking...', 'सोच रहा हूँ...')}</span>
+                  <Loader2 className="w-4 h-4 text-accent animate-spin" />
+                  <span className="text-xs text-muted-foreground">{t('Thinking...', 'सोच रहा हूँ...')}</span>
                 </div>
               </div>
             </div>
@@ -438,13 +438,13 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
       {attachedFiles.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 mt-2 px-2">
           {attachedFiles.map((file) => (
-            <div key={file.id} className="flex items-center gap-2 px-3 py-2 bg-gray-800 rounded-lg border border-white/10 group">
+            <div key={file.id} className="flex items-center gap-2 px-3 py-2 bg-secondary rounded-lg border border-border group">
               {file.type.startsWith('image/') ? (
                 <img src={`data:${file.type};base64,${file.data}`} alt={file.name} className="w-10 h-10 rounded object-cover" />
               ) : (
                 getFileIcon(file.type)
               )}
-              <span className="text-xs text-gray-300 max-w-[120px] truncate">{file.name}</span>
+              <span className="text-xs text-muted-foreground max-w-[120px] truncate">{file.name}</span>
               <button
                 onClick={() => removeAttachedFile(file.id)}
                 className="w-5 h-5 rounded-full bg-red-500/20 hover:bg-red-500/40 flex items-center justify-center transition-colors"
@@ -457,7 +457,7 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
       )}
 
       {/* Clean input bar */}
-      <div className="flex items-center gap-2 mt-4 p-2 rounded-full bg-gray-900/80 border border-white/10">
+      <div className="flex items-center gap-2 mt-4 p-2 rounded-full bg-card/80 border border-border">
         <input
           type="file"
           accept="image/*,.pdf"
@@ -469,7 +469,7 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
         <Button
           variant="ghost"
           size="icon"
-          className="text-gray-400 hover:text-white hover:bg-white/10 rounded-full"
+          className="text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full"
           onClick={() => fileInputRef.current?.click()}
           title={t('Attach files', 'फाइलें अटैच करें')}
         >
@@ -478,7 +478,7 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
         <Button
           variant="ghost"
           size="icon"
-          className="text-gray-400 hover:text-white hover:bg-white/10 rounded-full"
+          className="text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full"
           onClick={() => fileInputRef.current?.click()}
           title={t('Attach image', 'इमेज अटैच करें')}
         >
@@ -487,7 +487,7 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
         <Button
           variant="ghost"
           size="icon"
-          className="text-gray-400 hover:text-white hover:bg-white/10 rounded-full opacity-50"
+          className="text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full opacity-50"
           disabled
           title={t('Voice input', 'वॉइस इनपुट')}
         >
@@ -498,13 +498,13 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={t('Ask me anything...', 'मुझसे कुछ भी पूछें...')}
-          className="flex-1 bg-transparent border-none text-white placeholder:text-gray-500 focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="flex-1 bg-transparent border-none text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
           disabled={loading || waitingAllCooldown}
         />
         <Button
           onClick={handleSend}
           disabled={loading || waitingAllCooldown || (!input.trim() && attachedFiles.length === 0)}
-          className="bg-[#F97316] hover:bg-[#F97316]/90 text-white rounded-full w-10 h-10"
+          className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-full w-10 h-10"
           size="icon"
         >
           <Send className="w-4 h-4" />

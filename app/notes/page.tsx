@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function NotesPage() {
   return (
-    <main className="min-h-screen bg-black">
+    <main className="min-h-screen bg-background">
       <Navbar />
       <AllNotes />
       <Footer />

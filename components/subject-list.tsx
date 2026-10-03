@@ -45,46 +45,46 @@ export function SubjectList({ year, branch, sem }: { year: number; branch: strin
   }, [year, branch, sem]);
 
   return (
-    <section className="pt-24 pb-16 md:pt-32 md:pb-24 bg-black">
+    <section className="pt-24 pb-16 md:pt-32 md:pb-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <Link href={`/year/${year}/${branch}`} className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm mb-6">
+          <Link href={`/year/${year}/${branch}`} className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm mb-6">
             <ArrowLeft className="w-4 h-4" />
             {t('Back to Semesters', 'सेमेस्टर पर वापस')}
           </Link>
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
             {t('Subjects', 'विषय')}
           </h1>
-          <p className="text-gray-400 text-lg">
+          <p className="text-muted-foreground text-lg">
             {t('Select a subject to view notes and materials', 'नोट्स और सामग्री देखने के लिए विषय चुनें')}
           </p>
         </div>
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-32 bg-gray-800" />
+              <Skeleton key={i} className="h-32 bg-secondary" />
             ))}
           </div>
         ) : subjects.length === 0 ? (
           <div className="text-center py-20">
-            <BookOpen className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400 text-lg">{t('No subjects found yet.', 'अभी कोई विषय नहीं मिला।')}</p>
+            <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground text-lg">{t('No subjects found yet.', 'अभी कोई विषय नहीं मिला।')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {subjects.map((subject, i) => (
               <Link href={`/subject/${subject.slug}`} key={subject.id}>
-                <Card className={`group relative overflow-hidden bg-gray-900 border transition-all duration-300 hover:scale-[1.02] cursor-pointer p-6 ${cardColors[i % cardColors.length]}`}>
+                <Card className={`group relative overflow-hidden bg-card border transition-all duration-300 hover:scale-[1.02] cursor-pointer p-6 ${cardColors[i % cardColors.length]}`}>
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
-                      <BookOpen className="w-5 h-5 text-[#F97316]" />
+                    <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+                      <BookOpen className="w-5 h-5 text-accent" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white group-hover:text-[#F97316] transition-colors leading-tight">
+                      <h3 className="text-lg font-bold text-foreground group-hover:text-accent transition-colors leading-tight">
                         {subject.name}
                       </h3>
                       {subject.code && (
-                        <p className="text-gray-500 text-sm mt-1">{subject.code}</p>
+                        <p className="text-muted-foreground text-sm mt-1">{subject.code}</p>
                       )}
                     </div>
                   </div>
