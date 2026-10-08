@@ -74,7 +74,7 @@ function formatResponseText(text: string): React.ReactNode {
     }
 
     if (trimmed.startsWith('━') || trimmed.startsWith('─') || trimmed.startsWith('═')) {
-      return <hr key={i} className="border-t border-gray-700 my-2" />;
+      return <hr key={i} className="border-t border-border my-2" />;
     }
 
     if (trimmed === '') {
@@ -368,7 +368,7 @@ export function ChatInterface({ fullPage = false, isAdmin = false }: { fullPage?
                   ? 'bg-green-500/20 text-green-400 border-green-500/40'
                   : status.onCooldown
                   ? 'bg-red-500/20 text-red-400 border-red-500/40'
-                  : 'bg-secondary/50 text-muted-foreground border-gray-700/40'
+                  : 'bg-secondary/50 text-muted-foreground border-border'
               )}
             >
               <span>{status.index + 1}</span>

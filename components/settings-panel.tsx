@@ -19,7 +19,7 @@ const textSizes = [
 ] as const;
 
 export function SettingsPanel() {
-  const { mode, theme, brightness, textSize, setMode, setTheme, setBrightness, setTextSize, toggleMode } = useTheme();
+  const { mode, theme, brightness, textSize, setTheme, setBrightness, setTextSize, toggleMode } = useTheme();
   const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -130,7 +130,7 @@ export function SettingsPanel() {
                     }}
                   >
                     {theme === th.id && (
-                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} />
+                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
                     )}
