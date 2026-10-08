@@ -60,14 +60,16 @@ export default function Navbar() {
             </span>
           </Link>
 
-          <div className="hidden lg:flex xl:hidden items-center gap-3 min-w-0">
+          <div className="hidden lg:flex xl:hidden items-center gap-1 rounded-xl bg-secondary/60 border border-border/70 p-1 min-w-0">
             {priorityNavLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  'text-xs font-medium transition-colors hover:text-accent whitespace-nowrap',
-                  pathname === link.href ? 'text-accent' : 'text-muted-foreground'
+                  'text-[11px] font-semibold transition-all hover:text-foreground whitespace-nowrap px-2 py-1.5 rounded-lg',
+                  pathname === link.href
+                    ? 'text-accent bg-background shadow-sm'
+                    : 'text-muted-foreground hover:bg-background/70'
                 )}
               >
                 {link.label}
@@ -75,13 +77,13 @@ export default function Navbar() {
             ))}
           </div>
 
-          <div className="hidden xl:flex items-center gap-4 2xl:gap-6 min-w-0">
+          <div className="hidden xl:flex items-center gap-3 2xl:gap-5 min-w-0">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  'text-sm font-medium transition-colors hover:text-accent',
+                  'text-xs 2xl:text-sm font-medium transition-colors hover:text-accent whitespace-nowrap',
                   pathname === link.href ? 'text-accent' : 'text-muted-foreground'
                 )}
               >
@@ -91,13 +93,13 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-2">
-            <form onSubmit={handleSearch} className="hidden xl:flex items-center relative shrink-0">
+            <form onSubmit={handleSearch} className="hidden lg:flex items-center relative shrink-0">
               <Input
                 type="search"
                 placeholder={t('Search notes...', 'नोट्स खोजें...')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-40 2xl:w-48 bg-secondary border-border text-foreground placeholder:text-muted-foreground pr-9"
+                className="w-32 xl:w-40 2xl:w-48 bg-secondary border-border text-foreground placeholder:text-muted-foreground pr-9"
               />
               <button type="submit" className="absolute right-2 text-muted-foreground hover:text-foreground">
                 <Search className="w-4 h-4" />
