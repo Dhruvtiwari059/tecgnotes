@@ -37,7 +37,7 @@ export function BranchSelector({ year }: { year: number }) {
                 <div className={`absolute inset-0 bg-gradient-to-br ${branch.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
                 <div className="relative flex flex-col items-center gap-4">
                   <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${branch.color} flex items-center justify-center shadow-lg`}>
-                    <branch.icon className="w-8 h-8 text-foreground" />
+                    <branch.icon className="w-8 h-8 text-primary-foreground" />
                   </div>
                   <div className="text-center">
                     <h3 className="text-xl font-bold text-foreground group-hover:text-accent transition-colors">

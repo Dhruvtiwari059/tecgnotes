@@ -70,13 +70,13 @@ export function SettingsPanel() {
           {/* Brightness slider */}
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-muted-foreground">{t('Brightness', 'ब्राइटनेस')}</span>
+              <span className="text-sm text-muted-foreground">{t('Brightness', 'ब्राइटनेस')} <span className="text-xs opacity-70">(90–110%)</span></span>
               <span className="text-xs text-muted-foreground font-medium">{brightness}%</span>
             </div>
             <input
               type="range"
-              min={50}
-              max={150}
+              min={90}
+              max={110}
               step={5}
               value={brightness}
               onChange={(e) => setBrightness(Number(e.target.value))}

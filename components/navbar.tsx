@@ -56,7 +56,7 @@ export default function Navbar() {
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden xl:flex items-center gap-4 2xl:gap-6 min-w-0">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -72,13 +72,13 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-2">
-            <form onSubmit={handleSearch} className="hidden md:flex items-center relative">
+            <form onSubmit={handleSearch} className="hidden xl:flex items-center relative shrink-0">
               <Input
                 type="search"
                 placeholder={t('Search notes...', 'नोट्स खोजें...')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-48 bg-secondary border-border text-foreground placeholder:text-muted-foreground pr-9"
+                className="w-40 2xl:w-48 bg-secondary border-border text-foreground placeholder:text-muted-foreground pr-9"
               />
               <button type="submit" className="absolute right-2 text-muted-foreground hover:text-foreground">
                 <Search className="w-4 h-4" />
@@ -108,7 +108,7 @@ export default function Navbar() {
             <SettingsPanel />
 
             <button
-              className="md:hidden text-foreground p-2"
+              className="xl:hidden text-foreground p-2"
               onClick={() => setMobileOpen(!mobileOpen)}
             >
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -118,7 +118,7 @@ export default function Navbar() {
       </div>
 
       {mobileOpen && (
-        <div className="md:hidden bg-background/95 border-t border-border px-4 py-4 space-y-3">
+        <div className="xl:hidden bg-background/95 border-t border-border px-4 py-4 space-y-3">
           <form onSubmit={handleSearch} className="flex items-center relative">
             <Input
               type="search"

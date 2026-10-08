@@ -33,7 +33,8 @@ const themeInitScript = `
     root.classList.remove('dark', 'light');
     root.classList.add(prefs.mode || 'dark');
     root.setAttribute('data-theme', prefs.theme || 'blue');
-    root.style.filter = 'brightness(' + (prefs.brightness || 100) + '%)';
+    var brightness = Math.min(110, Math.max(90, Number(prefs.brightness) || 100));
+    root.style.filter = 'brightness(' + brightness + '%)';
     var ts = prefs.textSize || 'medium';
     root.style.fontSize = ts === 'small' ? '14px' : ts === 'large' ? '18px' : '16px';
   } catch(e) {

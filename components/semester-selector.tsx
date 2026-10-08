@@ -41,7 +41,7 @@ export function SemesterSelector({ year, branch }: { year: number; branch: strin
                 <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
                 <div className="relative flex items-center gap-6">
                   <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center shadow-lg flex-shrink-0`}>
-                    <Calendar className="w-7 h-7 text-foreground" />
+                    <Calendar className="w-7 h-7 text-primary-foreground" />
                   </div>
                   <div>
                     <h3 className="text-2xl font-bold text-foreground group-hover:text-accent transition-colors">

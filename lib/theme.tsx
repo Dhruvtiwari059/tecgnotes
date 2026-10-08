@@ -39,6 +39,10 @@ const ThemeContext = createContext<ThemeContextType>({
 
 const STORAGE_KEY = 'technotes-theme';
 
+function normalizeBrightness(value: number): number {
+  return Math.min(110, Math.max(90, value));
+}
+
 function textSizeToPx(s: TextSize): number {
   if (s === 'small') return 14;
   if (s === 'large') return 18;
@@ -50,7 +54,7 @@ function applyPrefs(prefs: ThemePrefs) {
   root.classList.remove('dark', 'light');
   root.classList.add(prefs.mode);
   root.setAttribute('data-theme', prefs.theme);
-  root.style.filter = `brightness(${prefs.brightness}%)`;
+  root.style.filter = `brightness(${normalizeBrightness(prefs.brightness)}%)`;
   root.style.fontSize = `${textSizeToPx(prefs.textSize)}px`;
 }
 
@@ -67,6 +71,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       // ignore
     }
     const merged = stored ? { ...defaults, ...stored } : defaults;
+    merged.brightness = normalizeBrightness(merged.brightness);
     setPrefs(merged);
     applyPrefs(merged);
     setMounted(true);
@@ -74,7 +79,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const update = useCallback((patch: Partial<ThemePrefs>) => {
     setPrefs((prev) => {
-      const next = { ...prev, ...patch };
+      const next = {
+        ...prev,
+        ...patch,
+        brightness: normalizeBrightness(patch.brightness ?? prev.brightness),
+      };
       applyPrefs(next);
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
