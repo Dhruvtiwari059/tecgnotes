@@ -36,6 +36,10 @@ export default function Navbar() {
     { href: '/admin', label: t('Admin', 'एडमिन'), icon: Shield },
   ];
 
+  const priorityNavLinks = navLinks.filter((link) =>
+    ['/', '/pyq', '/imp-questions', '/syllabus', '/chatbot'].includes(link.href)
+  );
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -55,6 +59,21 @@ export default function Navbar() {
               Tech<span className="text-accent">Notes</span>
             </span>
           </Link>
+
+          <div className="hidden lg:flex xl:hidden items-center gap-3 min-w-0">
+            {priorityNavLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  'text-xs font-medium transition-colors hover:text-accent whitespace-nowrap',
+                  pathname === link.href ? 'text-accent' : 'text-muted-foreground'
+                )}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
 
           <div className="hidden xl:flex items-center gap-4 2xl:gap-6 min-w-0">
             {navLinks.map((link) => (
